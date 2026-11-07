@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/txshield/txshield/internal/security/approvals"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/security/approvals"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // MaxFindingsPerRule bounds the output of a single rule on adversarial

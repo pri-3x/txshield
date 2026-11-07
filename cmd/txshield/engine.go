@@ -9,15 +9,15 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/txshield/txshield/internal/analyzer"
-	"github.com/txshield/txshield/internal/api"
-	"github.com/txshield/txshield/internal/config"
-	"github.com/txshield/txshield/internal/evm"
-	"github.com/txshield/txshield/internal/security/reputation"
-	"github.com/txshield/txshield/internal/simulator"
-	"github.com/txshield/txshield/internal/storage"
-	"github.com/txshield/txshield/internal/version"
-	"github.com/txshield/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/internal/analyzer"
+	"github.com/pri-3x/txshield/internal/api"
+	"github.com/pri-3x/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/evm"
+	"github.com/pri-3x/txshield/internal/security/reputation"
+	"github.com/pri-3x/txshield/internal/simulator"
+	"github.com/pri-3x/txshield/internal/storage"
+	"github.com/pri-3x/txshield/internal/version"
+	"github.com/pri-3x/txshield/pkg/interfaces"
 )
 
 // buildEngine wires the analysis engine from configuration. pool may be nil

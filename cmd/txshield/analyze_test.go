@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 const (

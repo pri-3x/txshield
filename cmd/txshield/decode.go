@@ -9,11 +9,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/txshield/txshield/internal/decoder"
-	"github.com/txshield/txshield/internal/logging"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/decoder"
+	"github.com/pri-3x/txshield/internal/logging"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 const (

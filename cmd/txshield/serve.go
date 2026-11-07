@@ -14,14 +14,14 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/txshield/txshield/internal/api"
-	"github.com/txshield/txshield/internal/cache"
-	"github.com/txshield/txshield/internal/config"
-	"github.com/txshield/txshield/internal/logging"
-	"github.com/txshield/txshield/internal/metrics"
-	"github.com/txshield/txshield/internal/storage"
-	"github.com/txshield/txshield/internal/version"
-	"github.com/txshield/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/internal/api"
+	"github.com/pri-3x/txshield/internal/cache"
+	"github.com/pri-3x/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/logging"
+	"github.com/pri-3x/txshield/internal/metrics"
+	"github.com/pri-3x/txshield/internal/storage"
+	"github.com/pri-3x/txshield/internal/version"
+	"github.com/pri-3x/txshield/pkg/interfaces"
 )
 
 func runVersion(_ context.Context, args []string, stdout, stderr io.Writer) int {

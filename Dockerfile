@@ -10,7 +10,7 @@ COPY . .
 ARG VERSION=dev
 ARG COMMIT=unknown
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
-      -ldflags "-s -w -X github.com/txshield/txshield/internal/version.Version=${VERSION} -X github.com/txshield/txshield/internal/version.Commit=${COMMIT}" \
+      -ldflags "-s -w -X github.com/pri-3x/txshield/internal/version.Version=${VERSION} -X github.com/pri-3x/txshield/internal/version.Commit=${COMMIT}" \
       -o /out/txshield ./cmd/txshield
 
 # ---- anvil (fork simulation backend) ----

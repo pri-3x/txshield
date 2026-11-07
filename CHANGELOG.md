@@ -80,4 +80,4 @@ Fixed before release, from an independent review (details in the
 - The "assets leave and nothing comes back" finding listed the ETH sent with
   the call twice (once as the call's value, once as the simulated transfer).
 
-[0.1.0]: https://github.com/txshield/txshield/releases/tag/v0.1.0
+[0.1.0]: https://github.com/pri-3x/txshield/releases/tag/v0.1.0

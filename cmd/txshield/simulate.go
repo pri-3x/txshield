@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // ExitReverted: the simulation ran and the transaction reverted.

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 func f(rule, fp string, sev models.Severity, conf models.Confidence, src models.EvidenceSource) models.Finding {

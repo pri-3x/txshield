@@ -9,7 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/interfaces"
 )
 
 var selSymbol = common.FromHex("95d89b41")

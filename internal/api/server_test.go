@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/txshield/txshield/internal/config"
-	"github.com/txshield/txshield/internal/metrics"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/metrics"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 type fakeCheck struct {

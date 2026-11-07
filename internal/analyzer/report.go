@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/txshield/txshield/internal/evm"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/evm"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // maxRecommendations bounds the recommendation list.

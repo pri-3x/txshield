@@ -526,12 +526,11 @@ Phase 1 manual smoke test: `/health` returned 200 with Postgres and Redis ok; RP
 
 - Docker images and GitHub Actions have not run (no Docker daemon, no remote repository).
 - SDK not published to npm.
-- Module path `github.com/txshield/txshield` is a placeholder.
 - Local Go is 1.26.2. Build with 1.26.10+ (CI does); older patch releases have reachable stdlib CVEs.
 - Detection is heuristic and not exhaustive; see `docs/threat-model.md` §4 for accepted residual risks.
 
 ## Next steps (need you)
 
-1. Create the GitHub repository (replace the placeholder module path `github.com/txshield/txshield` if needed), push, and let CI run.
+1. Merge the pull request into `main` once CI is green on GitHub.
 2. Start Docker and run `docker compose up --build` once, then tag `v0.1.0` to exercise the release workflow.
 3. For npm: create the `npm` environment with required reviewers, add `NPM_TOKEN`, set `PUBLISH_NPM=true`.

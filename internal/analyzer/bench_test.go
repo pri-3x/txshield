@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/txshield/txshield/tests/fixtures"
+	"github.com/pri-3x/txshield/tests/fixtures"
 )
 
 // Full analysis pipeline (decode, reputation, contract facts from a fake

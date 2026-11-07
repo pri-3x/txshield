@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/txshield/txshield/internal/analyzer"
-	"github.com/txshield/txshield/internal/version"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/analyzer"
+	"github.com/pri-3x/txshield/internal/version"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 type stringList []string

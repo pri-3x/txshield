@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/txshield/txshield/internal/analyzer"
-	"github.com/txshield/txshield/internal/evm"
-	"github.com/txshield/txshield/internal/netguard"
-	"github.com/txshield/txshield/internal/simulator"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/analyzer"
+	"github.com/pri-3x/txshield/internal/evm"
+	"github.com/pri-3x/txshield/internal/netguard"
+	"github.com/pri-3x/txshield/internal/simulator"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // Engine bundles the analysis components the API exposes. Optional parts

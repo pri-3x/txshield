@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/txshield/txshield/internal/metrics"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/metrics"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // clientIP returns the caller's IP. X-Forwarded-For is honored only when the

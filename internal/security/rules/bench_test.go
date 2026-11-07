@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // Benchmarks for the full built-in rule set (29 rules) on representative

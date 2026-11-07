@@ -22,8 +22,8 @@ func TestParseSymbol(t *testing.T) {
 		{abiString("USDC"), "USDC"},
 		{abiString("USD₮0"), "USD₮0"},
 		{common.RightPadBytes([]byte("MKR"), 32), "MKR"},                           // bytes32 symbol
-		{abiString("US\u202eDC"), "USDC"},                                               // bidi override stripped
-		{abiString("A\u200bB C\n"), "ABC"},                                              // zero-width, space, newline stripped
+		{abiString("US\u202eDC"), "USDC"},                                          // bidi override stripped
+		{abiString("A\u200bB C\n"), "ABC"},                                         // zero-width, space, newline stripped
 		{abiString(strings.Repeat("X", 100)), strings.Repeat("X", MaxSymbolRunes)}, // capped
 		{abiString("<script>"), "script"},
 		{[]byte{1, 2, 3}, ""},

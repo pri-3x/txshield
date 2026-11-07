@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/txshield/txshield/internal/decoder"
-	"github.com/txshield/txshield/internal/security/reputation"
-	"github.com/txshield/txshield/internal/security/rules"
-	"github.com/txshield/txshield/internal/security/scoring"
-	"github.com/txshield/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/internal/decoder"
+	"github.com/pri-3x/txshield/internal/security/reputation"
+	"github.com/pri-3x/txshield/internal/security/rules"
+	"github.com/pri-3x/txshield/internal/security/scoring"
+	"github.com/pri-3x/txshield/pkg/interfaces"
 )
 
 // BuildOptions configures the standard analyzer wiring.

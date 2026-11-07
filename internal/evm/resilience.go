@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/txshield/txshield/internal/netguard"
+	"github.com/pri-3x/txshield/internal/netguard"
 )
 
 // RetryPolicy controls retries of transient RPC failures. Only idempotent
