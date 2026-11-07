@@ -18,7 +18,7 @@ func BenchmarkAPIAnalyzeParallel(b *testing.B) {
 	b.ReportAllocs()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			req := httptest.NewRequest("POST", "/api/v1/analyze", bytes.NewReader(body))
+			req := httptest.NewRequestWithContext(b.Context(), "POST", "/api/v1/analyze", bytes.NewReader(body))
 			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 			s.ServeHTTP(rr, req)

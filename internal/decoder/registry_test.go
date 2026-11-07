@@ -9,7 +9,7 @@ import (
 
 // Well-known selectors observed on mainnet. These pin both the signature
 // parser's canonicalization and the built-in signature strings.
-var knownSelectors = map[string]string{
+var knownSelectors = map[string]string{ //nolint:gosec // function selectors, not credentials
 	"transfer(address,uint256)":                                                 "0xa9059cbb",
 	"approve(address,uint256)":                                                  "0x095ea7b3",
 	"transferFrom(address,address,uint256)":                                     "0x23b872dd",

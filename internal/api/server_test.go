@@ -47,7 +47,7 @@ func newTestServer(t *testing.T, mutate func(*config.Config), checks ...interfac
 
 func do(t *testing.T, h http.Handler, method, path string, body io.Reader, hdr map[string]string) *httptest.ResponseRecorder {
 	t.Helper()
-	req := httptest.NewRequest(method, path, body)
+	req := httptest.NewRequestWithContext(t.Context(), method, path, body)
 	for k, v := range hdr {
 		req.Header.Set(k, v)
 	}
@@ -239,7 +239,7 @@ type sample struct {
 }
 
 func decodeReq(body string, ct string, limit int64) error {
-	req := httptest.NewRequest("POST", "/x", strings.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), "POST", "/x", strings.NewReader(body))
 	if ct != "" {
 		req.Header.Set("Content-Type", ct)
 	}

@@ -55,10 +55,9 @@ func renderValue(t abi.Type, v reflect.Value) any {
 	case abi.BytesTy:
 		return hexutil.Encode(v.Bytes())
 	case abi.FixedBytesTy, abi.FunctionTy, abi.HashTy:
+		// Fixed bytes, function, and hash values are byte arrays.
 		b := make([]byte, v.Len())
-		for i := range b {
-			b[i] = byte(v.Index(i).Uint())
-		}
+		reflect.Copy(reflect.ValueOf(b), v)
 		return hexutil.Encode(b)
 	case abi.SliceTy, abi.ArrayTy:
 		arr := make([]any, v.Len())

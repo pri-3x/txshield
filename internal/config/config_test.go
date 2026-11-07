@@ -21,7 +21,7 @@ func TestDefaultsAreValid(t *testing.T) {
 }
 
 func TestLoadOverrides(t *testing.T) {
-	c, err := LoadFrom(env(map[string]string{
+	c, err := LoadFrom(env(map[string]string{ //nolint:gosec // test fixture with fake credentials
 		"TXSHIELD_HTTP_ADDR":       ":9090",
 		"TXSHIELD_REQUEST_TIMEOUT": "10s",
 		"TXSHIELD_RPC_URLS":        "1=https://eth.example/v2/KEY, 11155111=http://localhost:8545",
