@@ -1,0 +1,51 @@
+{
+  "name": "benign-usdc-transfer",
+  "description": "Plain ERC-20 transfer with matching simulation.",
+  "kind": "benign",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "value": "0",
+    "data": "0xa9059cbb000000000000000000000000999999999999999999999999999999999999999900000000000000000000000000000000000000000000000000000000000f4240"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "standards": [
+        "erc20"
+      ],
+      "atBlock": 19000000
+    }
+  ],
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "assetTransfers": [
+      {
+        "asset": {
+          "kind": "erc20",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "from": "0x1111111111111111111111111111111111111111",
+        "to": "0x9999999999999999999999999999999999999999",
+        "amount": "1000000"
+      }
+    ],
+    "durationMs": 0
+  },
+  "expect": {
+    "minScore": 0,
+    "maxScore": 0,
+    "category": "low",
+    "verdict": "No significant risks detected by enabled checks."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "malicious-calldata-to-eoa",
+  "description": "Approve calldata sent to an address that has no code (wrong network or address).",
+  "kind": "malicious",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0x9999999999999999999999999999999999999999",
+    "value": "0",
+    "data": "0x095ea7b30000000000000000000000003fc91a3afd70395cd496c647d5a6cc9d4b2b7fadffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0x9999999999999999999999999999999999999999",
+      "isContract": false,
+      "codeSize": 0,
+      "isProxy": false,
+      "atBlock": 19000000
+    },
+    {
+      "chainId": 1,
+      "address": "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "expect": {
+    "rules": [
+      "TXS-INTERACT-005"
+    ],
+    "absentRules": [
+      "TXS-APPROVAL-001"
+    ],
+    "minScore": 20,
+    "maxScore": 39
+  }
+}

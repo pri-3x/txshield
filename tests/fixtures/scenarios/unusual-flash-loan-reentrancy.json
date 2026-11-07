@@ -1,0 +1,54 @@
+{
+  "name": "unusual-flash-loan-reentrancy",
+  "description": "Aave flashLoanSimple whose simulated trace re-enters the receiver. Reported as unusual (low/info), not as an exploit.",
+  "kind": "benign",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+    "value": "0",
+    "data": "0x42b0b77c000000000000000000000000dead000000000000000000000000000000000001000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000000000000000000000000000000000e8d4a5100000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100000000000000000000000000000000000000000000000000000000000000"
+  },
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "trace": {
+      "type": "CALL",
+      "from": "0x1111111111111111111111111111111111111111",
+      "to": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+      "gas": 0,
+      "gasUsed": 0,
+      "calls": [
+        {
+          "type": "CALL",
+          "from": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+          "to": "0xdead000000000000000000000000000000000001",
+          "gas": 0,
+          "gasUsed": 0,
+          "calls": [
+            {
+              "type": "CALL",
+              "from": "0xdead000000000000000000000000000000000001",
+              "to": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+              "gas": 0,
+              "gasUsed": 0
+            }
+          ]
+        }
+      ]
+    },
+    "durationMs": 0
+  },
+  "expect": {
+    "rules": [
+      "TXS-PATTERN-007",
+      "TXS-PATTERN-010"
+    ],
+    "minScore": 0,
+    "maxScore": 39
+  }
+}

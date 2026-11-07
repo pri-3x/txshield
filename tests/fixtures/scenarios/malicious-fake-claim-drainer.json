@@ -1,0 +1,85 @@
+{
+  "name": "malicious-fake-claim-drainer",
+  "description": "Payable claim() on an unknown contract; simulation shows three assets leaving the wallet to the attacker and nothing returned.",
+  "kind": "malicious",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0xdead000000000000000000000000000000000001",
+    "value": "10000000000000000",
+    "data": "0x4e71d92d"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0xdead000000000000000000000000000000000001",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "balanceChanges": [
+      {
+        "owner": "0x1111111111111111111111111111111111111111",
+        "asset": {
+          "kind": "erc20",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "before": "2500000000",
+        "after": "0",
+        "delta": "-2500000000"
+      }
+    ],
+    "assetTransfers": [
+      {
+        "asset": {
+          "kind": "erc20",
+          "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        "from": "0x1111111111111111111111111111111111111111",
+        "to": "0x9999999999999999999999999999999999999999",
+        "amount": "2500000000"
+      },
+      {
+        "asset": {
+          "kind": "erc20",
+          "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+        },
+        "from": "0x1111111111111111111111111111111111111111",
+        "to": "0x9999999999999999999999999999999999999999",
+        "amount": "1000000000000000000000"
+      },
+      {
+        "asset": {
+          "kind": "erc721",
+          "address": "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+          "tokenId": "42"
+        },
+        "from": "0x1111111111111111111111111111111111111111",
+        "to": "0x9999999999999999999999999999999999999999",
+        "amount": "1"
+      }
+    ],
+    "durationMs": 0
+  },
+  "expect": {
+    "rules": [
+      "TXS-VALUE-001",
+      "TXS-VALUE-002",
+      "TXS-VALUE-003",
+      "TXS-VALUE-004",
+      "TXS-VALUE-005"
+    ],
+    "minScore": 80,
+    "maxScore": 100,
+    "category": "critical"
+  }
+}

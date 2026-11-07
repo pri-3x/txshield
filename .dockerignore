@@ -1,0 +1,11 @@
+.git
+bin
+.env
+coverage.out
+node_modules
+frontend
+contracts/out
+contracts/cache
+sdk
+docs
+**/*_test.go

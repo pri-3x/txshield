@@ -1,0 +1,77 @@
+{
+  "name": "benign-unlimited-approval-known-router",
+  "description": "Unlimited approval to an allowlisted router is reported (exposure) but stays in the moderate band, not high.",
+  "kind": "benign",
+  "falsePositiveCase": true,
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "value": "0",
+    "data": "0x095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "standards": [
+        "erc20"
+      ],
+      "atBlock": 19000000
+    },
+    {
+      "chainId": 1,
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "reputation": [
+    {
+      "chainId": 1,
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "status": "allowed",
+      "source": "",
+      "sourceKind": "",
+      "reason": "fixture record",
+      "confidence": "high",
+      "updatedAt": "0001-01-01T00:00:00Z"
+    },
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "status": "allowed",
+      "source": "",
+      "sourceKind": "",
+      "reason": "fixture record",
+      "confidence": "high",
+      "updatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "durationMs": 0
+  },
+  "expect": {
+    "rules": [
+      "TXS-APPROVAL-001"
+    ],
+    "absentRules": [
+      "TXS-APPROVAL-005",
+      "TXS-APPROVAL-006"
+    ],
+    "minScore": 20,
+    "maxScore": 39,
+    "category": "moderate"
+  }
+}

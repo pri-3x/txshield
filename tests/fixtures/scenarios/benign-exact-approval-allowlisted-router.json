@@ -1,0 +1,76 @@
+{
+  "name": "benign-exact-approval-allowlisted-router",
+  "description": "Exact-amount approval to an allowlisted router; no approval findings expected.",
+  "kind": "benign",
+  "falsePositiveCase": true,
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "value": "0",
+    "data": "0x095ea7b30000000000000000000000007a250d5630b4cf539739df2c5dacb4c659f2488d00000000000000000000000000000000000000000000000000000000000f4240"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "standards": [
+        "erc20"
+      ],
+      "atBlock": 19000000
+    },
+    {
+      "chainId": 1,
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "reputation": [
+    {
+      "chainId": 1,
+      "address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+      "status": "allowed",
+      "source": "",
+      "sourceKind": "",
+      "reason": "fixture record",
+      "confidence": "high",
+      "updatedAt": "0001-01-01T00:00:00Z"
+    },
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "status": "allowed",
+      "source": "",
+      "sourceKind": "",
+      "reason": "fixture record",
+      "confidence": "high",
+      "updatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "durationMs": 0
+  },
+  "expect": {
+    "absentRules": [
+      "TXS-APPROVAL-001",
+      "TXS-APPROVAL-002",
+      "TXS-APPROVAL-006",
+      "TXS-INTERACT-003"
+    ],
+    "minScore": 0,
+    "maxScore": 0,
+    "verdict": "No significant risks detected by enabled checks."
+  }
+}

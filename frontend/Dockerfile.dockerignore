@@ -1,0 +1,11 @@
+# Dockerfile-specific ignore (BuildKit): the root .dockerignore excludes
+# sdk/ and frontend/ for the API image.
+**/node_modules
+**/.next
+**/dist
+**/coverage
+.git
+bin
+contracts/out
+contracts/cache
+.env

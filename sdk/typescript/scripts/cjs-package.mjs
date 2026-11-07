@@ -1,0 +1,4 @@
+// Marks dist/cjs as CommonJS so Node loads the require() build correctly
+// even though the package itself is "type": "module".
+import { writeFileSync } from "node:fs";
+writeFileSync(new URL("../dist/cjs/package.json", import.meta.url), JSON.stringify({ type: "commonjs" }) + "\n");

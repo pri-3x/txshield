@@ -1,0 +1,2730 @@
+{
+  "components": {
+    "schemas": {
+      "AddressReport": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "contract": {
+            "$ref": "#/components/schemas/ContractInfo"
+          },
+          "history": {
+            "$ref": "#/components/schemas/PageResponseOfAnalysisSummary"
+          },
+          "reputation": {
+            "$ref": "#/components/schemas/AddressReputation"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "reputation"
+        ],
+        "type": "object"
+      },
+      "AddressReputation": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/ReputationRecord"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "unknown",
+              "allowed",
+              "suspicious",
+              "blocked"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "records",
+          "sources",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AnalysisStats": {
+        "properties": {
+          "byCategory": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "byChain": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "highRisk": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "byCategory",
+          "byChain",
+          "highRisk",
+          "total"
+        ],
+        "type": "object"
+      },
+      "AnalysisSummary": {
+        "properties": {
+          "analyzedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "low",
+              "moderate",
+              "elevated",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "findingCount": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "native_transfer",
+              "contract_call",
+              "contract_creation",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "simulationCompleteness": {
+            "enum": [
+              "full",
+              "partial",
+              "none"
+            ],
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "analyzedAt",
+          "category",
+          "chainId",
+          "confidence",
+          "findingCount",
+          "id",
+          "kind",
+          "score",
+          "simulationCompleteness"
+        ],
+        "type": "object"
+      },
+      "AnalyzeRequest": {
+        "properties": {
+          "abi": {
+            "description": "arbitrary JSON"
+          },
+          "block": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "gas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "gasPrice": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxPriorityFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "persist": {
+            "type": "boolean"
+          },
+          "rpcUrl": {
+            "type": "string"
+          },
+          "simulate": {
+            "type": "boolean"
+          },
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "from"
+        ],
+        "type": "object"
+      },
+      "ApprovalAnalysis": {
+        "properties": {
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalWithState"
+            },
+            "type": "array"
+          },
+          "disclaimer": {
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/TransactionSummary"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "approvals",
+          "disclaimer",
+          "findings",
+          "recommendations",
+          "risk",
+          "transaction"
+        ],
+        "type": "object"
+      },
+      "ApprovalChange": {
+        "properties": {
+          "amount": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "asset": {
+            "$ref": "#/components/schemas/AssetRef"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "spender": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset",
+          "owner",
+          "spender"
+        ],
+        "type": "object"
+      },
+      "ApprovalGrant": {
+        "properties": {
+          "amount": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "contract": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "erc20_allowance",
+              "erc20_allowance_increase",
+              "erc20_or_erc721_approval",
+              "erc721_token_approval",
+              "operator_approval",
+              "eip2612_permit",
+              "dai_permit",
+              "permit2_allowance",
+              "permit2_permit"
+            ],
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "ownerIsSender": {
+            "type": "boolean"
+          },
+          "revocation": {
+            "type": "boolean"
+          },
+          "signed": {
+            "type": "boolean"
+          },
+          "spender": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenId": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          },
+          "via": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract",
+          "kind",
+          "owner",
+          "ownerIsSender",
+          "revocation",
+          "signed",
+          "spender",
+          "token",
+          "unlimited",
+          "via"
+        ],
+        "type": "object"
+      },
+      "ApprovalState": {
+        "properties": {
+          "amount": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "approvedForAll": {
+            "type": "boolean"
+          },
+          "block": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "integer"
+          },
+          "tokenApproved": {
+            "type": "boolean"
+          },
+          "unlimited": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "block",
+          "unlimited"
+        ],
+        "type": "object"
+      },
+      "ApprovalWithState": {
+        "properties": {
+          "amount": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "contract": {
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/ApprovalState"
+          },
+          "expiration": {
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "erc20_allowance",
+              "erc20_allowance_increase",
+              "erc20_or_erc721_approval",
+              "erc721_token_approval",
+              "operator_approval",
+              "eip2612_permit",
+              "dai_permit",
+              "permit2_allowance",
+              "permit2_permit"
+            ],
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "ownerIsSender": {
+            "type": "boolean"
+          },
+          "revocation": {
+            "type": "boolean"
+          },
+          "signed": {
+            "type": "boolean"
+          },
+          "spender": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenId": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "unlimited": {
+            "type": "boolean"
+          },
+          "via": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract",
+          "kind",
+          "owner",
+          "ownerIsSender",
+          "revocation",
+          "signed",
+          "spender",
+          "token",
+          "unlimited",
+          "via"
+        ],
+        "type": "object"
+      },
+      "AssetRef": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "native",
+              "erc20",
+              "erc721",
+              "erc1155"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "tokenId": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "AssetTransfer": {
+        "properties": {
+          "amount": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "asset": {
+            "$ref": "#/components/schemas/AssetRef"
+          },
+          "from": {
+            "type": "string"
+          },
+          "logIndex": {
+            "type": "integer"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "asset",
+          "from",
+          "to"
+        ],
+        "type": "object"
+      },
+      "BalanceChange": {
+        "properties": {
+          "after": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "asset": {
+            "$ref": "#/components/schemas/AssetRef"
+          },
+          "before": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "delta": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "after",
+          "asset",
+          "before",
+          "delta",
+          "owner"
+        ],
+        "type": "object"
+      },
+      "CallFrame": {
+        "properties": {
+          "calls": {
+            "items": {
+              "$ref": "#/components/schemas/CallFrame"
+            },
+            "type": "array"
+          },
+          "error": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "gas": {
+            "type": "integer"
+          },
+          "gasUsed": {
+            "type": "integer"
+          },
+          "input": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "revertReason": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "gas",
+          "gasUsed",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ChainInfo": {
+        "properties": {
+          "chainId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId"
+        ],
+        "type": "object"
+      },
+      "CheckResult": {
+        "properties": {
+          "critical": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "latencyMs": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "critical",
+          "latencyMs",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ContractInfo": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "atBlock": {
+            "type": "integer"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "codeHash": {
+            "type": "string"
+          },
+          "codeSize": {
+            "type": "integer"
+          },
+          "implementation": {
+            "type": "string"
+          },
+          "isContract": {
+            "type": "boolean"
+          },
+          "isProxy": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "standards": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "address",
+          "atBlock",
+          "chainId",
+          "codeSize",
+          "isContract",
+          "isProxy"
+        ],
+        "type": "object"
+      },
+      "DecodeRequest": {
+        "properties": {
+          "abi": {
+            "description": "arbitrary JSON"
+          },
+          "data": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "DecodedCall": {
+        "properties": {
+          "callType": {
+            "enum": [
+              "call",
+              "delegatecall",
+              "self",
+              "router_command",
+              "create"
+            ],
+            "type": "string"
+          },
+          "candidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/DecodedCall"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "native_transfer",
+              "contract_call",
+              "contract_creation",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "items": {
+              "$ref": "#/components/schemas/DecodedParam"
+            },
+            "type": "array"
+          },
+          "rawData": {
+            "type": "string"
+          },
+          "selector": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "builtin",
+              "user_abi",
+              "signature_db",
+              "none"
+            ],
+            "type": "string"
+          },
+          "standard": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "callType",
+          "kind",
+          "source"
+        ],
+        "type": "object"
+      },
+      "DecodedParam": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "description": "any JSON value (decoded ABI value: string, boolean, array, or array of named params)"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ErrorBody": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "invalid_input",
+              "not_found",
+              "payload_too_large",
+              "rate_limited",
+              "unsupported",
+              "unavailable",
+              "timeout",
+              "internal"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "kind",
+          "message"
+        ],
+        "type": "object"
+      },
+      "Evidence": {
+        "properties": {
+          "data": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "fact",
+              "heuristic",
+              "external"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail",
+          "source",
+          "type"
+        ],
+        "type": "object"
+      },
+      "FieldError": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "message"
+        ],
+        "type": "object"
+      },
+      "Finding": {
+        "properties": {
+          "category": {
+            "enum": [
+              "approval",
+              "interaction",
+              "value_transfer",
+              "dangerous_pattern",
+              "reputation",
+              "simulation"
+            ],
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array"
+          },
+          "falsePositiveNotes": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "mitigation": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "fact",
+              "heuristic",
+              "external"
+            ],
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "confidence",
+          "description",
+          "fingerprint",
+          "mitigation",
+          "ruleId",
+          "severity",
+          "source",
+          "title"
+        ],
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "type": "object"
+          },
+          "commit": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "checks",
+          "commit",
+          "status",
+          "version"
+        ],
+        "type": "object"
+      },
+      "InfoResponse": {
+        "properties": {
+          "allowUserRpc": {
+            "type": "boolean"
+          },
+          "chains": {
+            "items": {
+              "$ref": "#/components/schemas/ChainInfo"
+            },
+            "type": "array"
+          },
+          "commit": {
+            "type": "string"
+          },
+          "persistence": {
+            "type": "boolean"
+          },
+          "reputationSources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rules": {
+            "type": "integer"
+          },
+          "simulator": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "allowUserRpc",
+          "chains",
+          "commit",
+          "persistence",
+          "reputationSources",
+          "rules",
+          "simulator",
+          "version"
+        ],
+        "type": "object"
+      },
+      "Log": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "address",
+          "data",
+          "index",
+          "topics"
+        ],
+        "type": "object"
+      },
+      "PageResponseOfAnalysisSummary": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisSummary"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "offset",
+          "total"
+        ],
+        "type": "object"
+      },
+      "ReputationRecord": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceKind": {
+            "enum": [
+              "local",
+              "list",
+              "external"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "unknown",
+              "allowed",
+              "suspicious",
+              "blocked"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "confidence",
+          "source",
+          "sourceKind",
+          "status",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "RiskAssessment": {
+        "properties": {
+          "category": {
+            "enum": [
+              "low",
+              "moderate",
+              "elevated",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "type": "string"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreContribution"
+            },
+            "type": "array"
+          },
+          "score": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "confidence",
+          "contributions",
+          "score"
+        ],
+        "type": "object"
+      },
+      "RiskReport": {
+        "properties": {
+          "analyzedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "approvals": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalGrant"
+            },
+            "type": "array"
+          },
+          "balanceChanges": {
+            "items": {
+              "$ref": "#/components/schemas/BalanceChange"
+            },
+            "type": "array"
+          },
+          "decoded": {
+            "$ref": "#/components/schemas/DecodedCall"
+          },
+          "disclaimer": {
+            "type": "string"
+          },
+          "enabledChecks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "engineVersion": {
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskAssessment"
+          },
+          "simulation": {
+            "$ref": "#/components/schemas/SimulationResult"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/TransactionSummary"
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "analyzedAt",
+          "approvals",
+          "disclaimer",
+          "enabledChecks",
+          "engineVersion",
+          "findings",
+          "id",
+          "recommendations",
+          "risk",
+          "transaction",
+          "verdict"
+        ],
+        "type": "object"
+      },
+      "ScoreContribution": {
+        "properties": {
+          "fingerprint": {
+            "type": "string"
+          },
+          "points": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fingerprint",
+          "points",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "SimulateRequest": {
+        "properties": {
+          "block": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "gas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "gasPrice": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxPriorityFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "rpcUrl": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "from"
+        ],
+        "type": "object"
+      },
+      "SimulationResult": {
+        "properties": {
+          "approvalChanges": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalChange"
+            },
+            "type": "array"
+          },
+          "assetTransfers": {
+            "items": {
+              "$ref": "#/components/schemas/AssetTransfer"
+            },
+            "type": "array"
+          },
+          "backend": {
+            "type": "string"
+          },
+          "balanceChanges": {
+            "items": {
+              "$ref": "#/components/schemas/BalanceChange"
+            },
+            "type": "array"
+          },
+          "blockHash": {
+            "type": "string"
+          },
+          "blockNumber": {
+            "type": "integer"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "completeness": {
+            "enum": [
+              "full",
+              "partial",
+              "none"
+            ],
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "integer"
+          },
+          "gasEstimate": {
+            "type": "integer"
+          },
+          "gasUsed": {
+            "type": "integer"
+          },
+          "incompleteReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "logs": {
+            "items": {
+              "$ref": "#/components/schemas/Log"
+            },
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "returnData": {
+            "type": "string"
+          },
+          "revertReason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "reverted",
+              "not_run",
+              "error"
+            ],
+            "type": "string"
+          },
+          "trace": {
+            "$ref": "#/components/schemas/CallFrame"
+          }
+        },
+        "required": [
+          "backend",
+          "blockNumber",
+          "chainId",
+          "completeness",
+          "durationMs",
+          "gasUsed",
+          "status"
+        ],
+        "type": "object"
+      },
+      "TransactionLookup": {
+        "properties": {
+          "blockNumber": {
+            "type": "integer"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/TransactionRequest"
+          }
+        },
+        "required": [
+          "chainId",
+          "hash",
+          "notes",
+          "transaction"
+        ],
+        "type": "object"
+      },
+      "TransactionRequest": {
+        "properties": {
+          "block": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "gas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "gasPrice": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "maxPriorityFeePerGas": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "from"
+        ],
+        "type": "object"
+      },
+      "TransactionSummary": {
+        "properties": {
+          "block": {
+            "type": "string"
+          },
+          "chainId": {
+            "type": "integer"
+          },
+          "chainName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "native_transfer",
+              "contract_call",
+              "contract_creation",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "description": "integer as a decimal string (inputs also accept JSON numbers and 0x-hex strings)",
+            "pattern": "^-?[0-9]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "block",
+          "chainId",
+          "description",
+          "from",
+          "kind",
+          "value"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "Required only when the server sets TXSHIELD_API_KEYS.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "EVM transaction security analysis and simulation. TxShield never signs or broadcasts transactions and never labels a transaction safe.",
+    "license": {
+      "identifier": "Apache-2.0",
+      "name": "Apache-2.0"
+    },
+    "title": "TxShield API",
+    "version": "1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/address/{address}": {
+      "get": {
+        "operationId": "inspectAddress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Chain to inspect",
+            "in": "query",
+            "name": "chainId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page size (1-100, default 20)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset (0-10000)",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressReport"
+                }
+              }
+            },
+            "description": "Contract facts, reputation, history"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Unsupported chain"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Engine unavailable"
+          }
+        },
+        "summary": "Inspect an address",
+        "tags": [
+          "history"
+        ]
+      }
+    },
+    "/api/v1/analyses": {
+      "get": {
+        "operationId": "listAnalyses",
+        "parameters": [
+          {
+            "description": "Page size (1-100, default 20)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset (0-10000)",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by chain",
+            "in": "query",
+            "name": "chainId",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Minimum risk score",
+            "in": "query",
+            "name": "minScore",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Analyses involving this address (any role)",
+            "in": "query",
+            "name": "address",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "RFC 3339 lower bound",
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseOfAnalysisSummary"
+                }
+              }
+            },
+            "description": "Page of summaries"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Persistence disabled"
+          }
+        },
+        "summary": "List stored analyses (newest first)",
+        "tags": [
+          "history"
+        ]
+      }
+    },
+    "/api/v1/analyses/{id}": {
+      "get": {
+        "operationId": "getAnalysis",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskReport"
+                }
+              }
+            },
+            "description": "Stored report (privacy options applied)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Not found or expired"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Persistence disabled"
+          }
+        },
+        "summary": "Get a stored analysis",
+        "tags": [
+          "history"
+        ]
+      }
+    },
+    "/api/v1/analyze": {
+      "post": {
+        "description": "Decodes, checks reputation and contract facts, simulates (when available and `simulate` is not false), evaluates security rules, and returns a risk report. Never signs or broadcasts. A low score means no significant risks were detected by the enabled checks, not that the transaction is safe.",
+        "operationId": "analyze",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskReport"
+                }
+              }
+            },
+            "description": "Risk report"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Body or calldata too large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Unsupported (e.g. RPC endpoint serves a different chain)"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Engine or dependency unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Timed out"
+          }
+        },
+        "summary": "Analyze a transaction",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/v1/approvals/analyze": {
+      "post": {
+        "description": "Returns every approval/permit the transaction grants or revokes, the permission currently in force on-chain (when an RPC endpoint is configured), and approval findings scored on their own. Simulation is off by default.",
+        "operationId": "analyzeApprovals",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalAnalysis"
+                }
+              }
+            },
+            "description": "Approval analysis"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Engine unavailable"
+          }
+        },
+        "summary": "Analyze the token permissions a transaction grants",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/v1/decode": {
+      "post": {
+        "description": "Decodes calldata without chain access. Omit `to` when the target is unknown. Recognizing a function says nothing about whether it is safe.",
+        "operationId": "decode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecodedCall"
+                }
+              }
+            },
+            "description": "Decoded call tree"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Calldata or ABI too large"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Decode calldata (offline)",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/v1/info": {
+      "get": {
+        "operationId": "info",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfoResponse"
+                }
+              }
+            },
+            "description": "Configured chains, simulator, rules"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          }
+        },
+        "summary": "Engine configuration",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "operationId": "openapi",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1 document"
+          }
+        },
+        "security": [],
+        "summary": "This document",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/v1/simulate": {
+      "post": {
+        "description": "Executes the transaction on a local fork (or the provider's tracer in rpc-trace mode). A revert is a successful response with `status: reverted`; infrastructure failures are errors.",
+        "operationId": "simulate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationResult"
+                }
+              }
+            },
+            "description": "Simulation result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Simulation not available for this chain"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Simulation backend unavailable"
+          },
+          "504": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Simulation timed out"
+          }
+        },
+        "summary": "Simulate a transaction on a private fork",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "operationId": "stats",
+        "parameters": [
+          {
+            "description": "RFC 3339 lower bound",
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisStats"
+                }
+              }
+            },
+            "description": "Counts by category and chain"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Persistence disabled"
+          }
+        },
+        "summary": "Aggregate statistics",
+        "tags": [
+          "history"
+        ]
+      }
+    },
+    "/api/v1/transactions/{hash}": {
+      "get": {
+        "description": "Fetches a transaction by hash from the configured RPC endpoint and returns it in /analyze request form. Mined transactions are set to replay on top of their parent block (an approximation: earlier transactions in the same block are not re-applied).",
+        "operationId": "getTransaction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hash",
+            "required": true,
+            "schema": {
+              "pattern": "^0x[0-9a-fA-F]{64}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Chain to look up",
+            "in": "query",
+            "name": "chainId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionLookup"
+                }
+              }
+            },
+            "description": "Transaction ready for analysis"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Invalid input (see `error.fields`)"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Missing or invalid API key (only when keys are configured)"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Transaction not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Chain not configured"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "RPC unavailable"
+          }
+        },
+        "summary": "Look up a transaction for re-analysis",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Healthy or degraded (a non-critical dependency failed)"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "A critical dependency failed"
+          }
+        },
+        "security": [],
+        "summary": "Health with dependency checks",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/livez": {
+      "get": {
+        "operationId": "livez",
+        "responses": {
+          "200": {
+            "description": "Process is serving"
+          }
+        },
+        "security": [],
+        "summary": "Liveness probe",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "metrics",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Prometheus text exposition"
+          }
+        },
+        "security": [],
+        "summary": "Prometheus metrics",
+        "tags": [
+          "ops"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {}
+  ],
+  "servers": [
+    {
+      "description": "Local development (docker compose)",
+      "url": "http://localhost:8080"
+    }
+  ]
+}

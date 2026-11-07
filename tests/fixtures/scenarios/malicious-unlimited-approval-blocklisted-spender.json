@@ -1,0 +1,57 @@
+{
+  "name": "malicious-unlimited-approval-blocklisted-spender",
+  "description": "Unlimited USDC approval to a spender on the operator blocklist.",
+  "kind": "malicious",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "value": "0",
+    "data": "0x095ea7b3000000000000000000000000dead000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "standards": [
+        "erc20"
+      ],
+      "atBlock": 19000000
+    },
+    {
+      "chainId": 1,
+      "address": "0xdead000000000000000000000000000000000001",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "reputation": [
+    {
+      "chainId": 1,
+      "address": "0xdead000000000000000000000000000000000001",
+      "status": "blocked",
+      "source": "",
+      "sourceKind": "",
+      "reason": "fixture record",
+      "confidence": "high",
+      "updatedAt": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "expect": {
+    "rules": [
+      "TXS-APPROVAL-001",
+      "TXS-APPROVAL-005"
+    ],
+    "absentRules": [
+      "TXS-INTERACT-001"
+    ],
+    "minScore": 80,
+    "maxScore": 100,
+    "category": "critical"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "benign-eth-transfer",
+  "description": "Plain ETH transfer to an account.",
+  "kind": "benign",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0x9999999999999999999999999999999999999999",
+    "value": "1000000000000000000"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0x9999999999999999999999999999999999999999",
+      "isContract": false,
+      "codeSize": 0,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "simulation": {
+    "backend": "fixture",
+    "status": "success",
+    "completeness": "full",
+    "chainId": 1,
+    "blockNumber": 19000000,
+    "gasUsed": 100000,
+    "durationMs": 0
+  },
+  "expect": {
+    "minScore": 0,
+    "maxScore": 0,
+    "verdict": "No significant risks detected by enabled checks."
+  }
+}

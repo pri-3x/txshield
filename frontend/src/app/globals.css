@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* Design tokens. Values follow the validated reference data-viz palette:
+   light and dark are each selected steps, not an automatic inversion. */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f0efec;
+  --line: #dddcd7;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --ink-3: #6b6a66;
+  --accent: #2a78d6;
+  --accent-ink: #1c5cab;
+  --btn: #1c5cab; /* white text 6.6:1 */
+  --bar: #2a78d6;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --good-ink: #006300;
+  --warning-ink: #7a5200;
+  --serious-ink: #9c3f19;
+  --critical-ink: #a82626;
+  --focus: #2a78d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #262624;
+    --line: #383835;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --ink-3: #a3a29a;
+    --accent: #3987e5;
+    --accent-ink: #86b6ef;
+    --btn: #2a78d6; /* white text 4.6:1 */
+    --bar: #3987e5;
+    --good-ink: #5fd35f;
+    --warning-ink: #fab219;
+    --serious-ink: #f2a07f;
+    --critical-ink: #f08a8a;
+    --focus: #86b6ef;
+  }
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-btn: var(--btn);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-serious: var(--serious);
+  --color-critical: var(--critical);
+  --color-good-ink: var(--good-ink);
+  --color-warning-ink: var(--warning-ink);
+  --color-serious-ink: var(--serious-ink);
+  --color-critical-ink: var(--critical-ink);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html {
+  background: var(--page);
+  color: var(--ink);
+}
+
+body {
+  background: var(--page);
+  min-height: 100dvh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,17 @@
+# TxShield security test fixtures. These contracts exist only to be deployed
+# on a local Anvil chain by the integration tests. They are deliberately
+# minimal and some are deliberately malicious or vulnerable. Never deploy
+# them to a real network.
+[profile.default]
+src = "fixtures"
+out = "out"
+cache_path = "cache"
+libs = []
+solc_version = "0.8.24"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+
+# Fixtures are intentionally unsafe; lint warnings are expected noise.
+[lint]
+lint_on_build = false

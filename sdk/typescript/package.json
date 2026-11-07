@@ -1,0 +1,54 @@
+{
+  "name": "@txshield/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript client for the TxShield EVM transaction security and simulation API",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "ethereum",
+    "evm",
+    "security",
+    "transaction",
+    "simulation",
+    "approvals"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript ../../internal/api/openapi.json -o src/generated/openapi.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/cjs-package.mjs",
+    "test": "vitest run test/client.test.ts",
+    "test:integration": "vitest run test/integration.test.ts",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}

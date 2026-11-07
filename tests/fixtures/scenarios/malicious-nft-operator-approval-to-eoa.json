@@ -1,0 +1,41 @@
+{
+  "name": "malicious-nft-operator-approval-to-eoa",
+  "description": "setApprovalForAll on an NFT collection to an account with no code (classic NFT phishing).",
+  "kind": "malicious",
+  "tx": {
+    "chainId": 1,
+    "from": "0x1111111111111111111111111111111111111111",
+    "to": "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+    "value": "0",
+    "data": "0xa22cb46500000000000000000000000099999999999999999999999999999999999999990000000000000000000000000000000000000000000000000000000000000001"
+  },
+  "contracts": [
+    {
+      "chainId": 1,
+      "address": "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+      "isContract": true,
+      "codeSize": 1000,
+      "isProxy": false,
+      "standards": [
+        "erc721"
+      ],
+      "atBlock": 19000000
+    },
+    {
+      "chainId": 1,
+      "address": "0x9999999999999999999999999999999999999999",
+      "isContract": false,
+      "codeSize": 0,
+      "isProxy": false,
+      "atBlock": 19000000
+    }
+  ],
+  "expect": {
+    "rules": [
+      "TXS-APPROVAL-003",
+      "TXS-APPROVAL-004"
+    ],
+    "minScore": 60,
+    "maxScore": 100
+  }
+}

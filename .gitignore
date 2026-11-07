@@ -1,0 +1,13 @@
+/bin/
+coverage.out
+.env
+*.local
+.DS_Store
+node_modules/
+.next/
+/contracts/out/
+/contracts/cache/
+/sdk/typescript/dist/
+/frontend/.next/
+/frontend/next-env.d.ts
+*.tsbuildinfo

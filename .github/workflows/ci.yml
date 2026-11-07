@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          # Track the newest 1.26 patch release: govulncheck fails the build on
+          # reachable stdlib vulnerabilities fixed in later patch releases.
+          go-version: "1.26.x"
+          check-latest: true
+      - name: gofmt
+        run: make fmt-check
+      - name: go vet
+        run: make vet
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: v2.6
+          args: --build-tags integration
+      - name: Unit tests (race)
+        run: go test -race -count=1 -coverprofile=coverage.out ./...
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -1
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      - name: Fuzz decoder (smoke)
+        run: make fuzz FUZZTIME=20s
+      - name: Scenario fixtures are up to date
+        run: |
+          go run ./tests/fixtures/gen
+          git diff --exit-code tests/fixtures/scenarios
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: txshield
+          POSTGRES_PASSWORD: txshield
+          POSTGRES_DB: txshield
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U txshield"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          # Track the newest 1.26 patch release: govulncheck fails the build on
+          # reachable stdlib vulnerabilities fixed in later patch releases.
+          go-version: "1.26.x"
+          check-latest: true
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.8.5
+      - name: Integration tests (Postgres, Anvil simulation, Solidity fixtures)
+        env:
+          TXSHIELD_TEST_DATABASE_URL: postgres://txshield:txshield@localhost:5432/txshield?sslmode=disable
+        run: go test -tags integration -count=1 -v ./tests/integration/...
+
+  sdk:
+    name: TypeScript SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/typescript
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: sdk/typescript/package-lock.json
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.8.5
+      - run: npm ci
+      - name: Generated types match the OpenAPI document
+        run: |
+          npm run generate
+          git diff --exit-code src/generated
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Package contents
+        run: npm pack --dry-run
+      - name: Integration tests (real txshield server + anvil)
+        run: npm run test:integration
+      - run: npm audit --audit-level=moderate
+
+  dashboard:
+    name: Dashboard
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: txshield
+          POSTGRES_PASSWORD: txshield
+          POSTGRES_DB: txshield
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U txshield"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+      - uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.8.5
+      - name: Build SDK
+        working-directory: sdk/typescript
+        run: npm ci && npm run build
+      - name: Install
+        working-directory: frontend
+        run: npm ci
+      - name: Typecheck, lint, unit and accessibility tests
+        working-directory: frontend
+        run: npm run typecheck && npm run lint && npm test
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+      - name: Smoke test (real API + anvil + Postgres)
+        working-directory: frontend
+        env:
+          TXSHIELD_TEST_DATABASE_URL: postgres://txshield:txshield@localhost:5432/txshield?sslmode=disable
+          PGPASSWORD: txshield
+        run: |
+          psql -h localhost -U txshield -d txshield -q -f ../migrations/000001_init.up.sql
+          npm run test:smoke
+      - name: Production dependency audit
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=moderate
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: false
+          build-args: |
+            VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build dashboard image
+        run: docker build -f frontend/Dockerfile -t txshield-dashboard:ci .
+      - name: Validate compose file
+        run: docker compose config --quiet
