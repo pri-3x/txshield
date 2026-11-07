@@ -1,0 +1,35 @@
+# Automatic HTTPS (Let's Encrypt) for the API and the dashboard.
+# Hostnames come from deploy/oracle/.env (setup.sh defaults them to
+# sslip.io names derived from the VM's public IP, so no domain is needed).
+{$API_HOST} {
+	encode zstd gzip
+	# Public routes only. /metrics stays inside the Docker network.
+	@public path /api/* /livez /health
+	handle @public {
+		reverse_proxy api:8080
+	}
+	handle {
+		respond "Not found" 404
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}
+
+{$APP_HOST} {
+	encode zstd gzip
+	reverse_proxy dashboard:3000
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}

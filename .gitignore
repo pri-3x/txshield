@@ -12,3 +12,4 @@ node_modules/
 /frontend/next-env.d.ts
 *.tsbuildinfo
 .claude/launch.json
+deploy/oracle/.env

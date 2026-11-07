@@ -128,6 +128,20 @@ All configuration comes from `TXSHIELD_*` environment variables; see
 | `TXSHIELD_RETENTION_DAYS` | `30` | Retention for stored analyses. |
 | `TXSHIELD_DASHBOARD_BASIC_AUTH` | — | Dashboard only: `user:password` (password ≥ 16 characters) to require HTTP Basic auth on every dashboard request. |
 
+## Browser extension
+
+[`extension/`](extension/README.md) is a Chrome/Edge/Brave extension
+(prototype) that checks each transaction a website asks your wallet to send,
+before the wallet opens, and shows a plain-language warning ("Don't sign
+this. It sends 1,000 TUSD* and NFT #1 out of your wallet, and you receive
+nothing."). It uses a TxShield API you configure.
+
+## Deploying
+
+[`deploy/oracle/`](deploy/oracle/README.md) runs the whole stack on one VM
+(Oracle Cloud Always Free works) with automatic HTTPS, API keys, and a
+dashboard password.
+
 ## Exposing TxShield beyond localhost
 
 Everything binds to `127.0.0.1` by default. Before exposing it:

@@ -46,6 +46,11 @@ First public release.
 - **Token display metadata**: simulated token assets carry the symbol and
   decimals their contracts report (sanitized, at most 16 tokens per report),
   labelled unverified and never used by the security rules.
+- **Browser extension** (prototype, Manifest V3): checks
+  `eth_sendTransaction` before the wallet opens and shows a plain-language
+  warning; Reject is the default.
+- **Single-VM deployment** (`deploy/oracle/`): Caddy with automatic HTTPS,
+  generated secrets, firewall setup; written for Oracle Cloud Always Free.
 - **Deployment**: Docker images (API with pinned, checksum-verified Anvil;
   distroless dashboard), Docker Compose stack, CI, and a release workflow
   that publishes binaries with checksums and provenance, and multi-arch
