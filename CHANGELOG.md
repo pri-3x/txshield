@@ -38,8 +38,14 @@ First public release.
   `decode`, `healthcheck`.
 - **TypeScript SDK** `@txshield/sdk`: types generated from OpenAPI,
   client-side validation, timeouts, retries, ESM and CommonJS builds.
-- **Dashboard** (Next.js): overview, scanner, security report, history,
-  address inspector; strict nonce CSP; optional HTTP Basic auth.
+- **Dashboard** (Next.js): an analyst console with overview, scanner,
+  security report (summary bar, score breakdown, findings table with
+  evidence, balance diff, asset transfers, call trace), history and address
+  inspector; header search by tx hash, address or analysis ID; strict nonce
+  CSP; optional HTTP Basic auth.
+- **Token display metadata**: simulated token assets carry the symbol and
+  decimals their contracts report (sanitized, at most 16 tokens per report),
+  labelled unverified and never used by the security rules.
 - **Deployment**: Docker images (API with pinned, checksum-verified Anvil;
   distroless dashboard), Docker Compose stack, CI, and a release workflow
   that publishes binaries with checksums and provenance, and multi-arch
@@ -68,5 +74,10 @@ Fixed before release, from an independent review (details in the
   calldata hashes are keyed when calldata storage is off; more non-routable
   IPv6 ranges are rejected by the SSRF guard.
 - The server listens on 127.0.0.1 by default.
+
+### Fixed
+
+- The "assets leave and nothing comes back" finding listed the ETH sent with
+  the call twice (once as the call's value, once as the simulated transfer).
 
 [0.1.0]: https://github.com/txshield/txshield/releases/tag/v0.1.0

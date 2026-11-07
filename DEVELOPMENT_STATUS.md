@@ -2,6 +2,26 @@
 
 Last updated: 2026-11-07. Current phase: **8 (Hardening & release), complete** except the items under *Not verified*. All eight phases are implemented.
 
+## Post-release: dashboard redesign (analyst console)
+
+After reviewing three prototype directions (on a design canvas, using a real
+drainer scan), direction B, the analyst console, was implemented.
+
+| Area | Files | Tested |
+|---|---|---|
+| Dark console theme; every text pair computed against WCAG AA (lowest 5.85:1) | `frontend/src/app/globals.css`, `src/lib/risk.ts` | contrast computed; axe on every page |
+| Shell: top bar with active nav (History link added) and header search by tx hash / address / analysis ID | `src/app/layout.tsx`, `src/components/NavLinks.tsx`, `src/app/go/page.tsx`, `src/lib/search.ts` | unit test for input classification |
+| Report: summary bar; score breakdown and coverage; findings table sorted by severity with expandable evidence; balance diff, transfers, call trace with named standard selectors; JSON download and copy link | `src/components/report.tsx`, `FindingsTable.tsx`, `ReportActions.tsx` | component tests + axe; smoke; visual check at 1440 and 375 px |
+| Overview, scanner, history, address restyled | `src/app/**` | smoke; no horizontal overflow at 375 px on all pages |
+| API: token symbol/decimals from the token contract (sanitized, unverified, after rules) | `internal/evm/tokenmeta.go`, `internal/analyzer/analyzer.go` | unit tests (hostile symbols) + integration (real token) |
+| Fix: net-loss finding listed the call's ETH twice | `internal/security/rules/value.go` | unit + integration |
+
+Test results (2026-11-07): Go race tests all packages ok; golangci-lint 0
+issues; integration 18 passed (Postgres + Anvil); dashboard 27 unit tests;
+smoke 21 checks passed with Postgres history.
+
+Limitation: the console is dark only (no light theme).
+
 ## Phase 8: Hardening & release (completed, with open items)
 
 ### Security review

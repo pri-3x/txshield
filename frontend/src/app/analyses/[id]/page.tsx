@@ -24,13 +24,15 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
   }
   return (
     <div className="space-y-4">
-      <p className="text-sm">
-        <Link href="/" className="text-accent-ink hover:underline">
-          ← Dashboard
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-ink-3">
+        <Link href="/analyses" className="hover:text-ink">
+          History
         </Link>
-      </p>
-      <h1 className="text-2xl font-semibold text-ink">Security report</h1>
-      <SecurityReport report={report} />
+        <span aria-hidden="true">/</span>
+        <span className="font-mono">{report.id.slice(0, 8)}</span>
+      </nav>
+      <h1 className="sr-only">Security report</h1>
+      <SecurityReport report={report} stored />
     </div>
   );
 }

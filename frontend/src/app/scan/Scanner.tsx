@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition, type KeyboardEvent, type ReactNode } from "react";
 import type { AnalysisResult, DecodedCall, TransactionLookup } from "@txshield/sdk";
 import { DecodedCallTree, SecurityReport } from "@/components/report";
-import { Card, Notice } from "@/components/ui";
+import { Card, Notice, btnPrimary, inputClass } from "@/components/ui";
 import { analyzeAction, decodeAction, lookupAction, type ActionError } from "./actions";
 
 type Mode = "params" | "hash" | "calldata";
@@ -54,9 +54,9 @@ const EXAMPLES: { label: string; fields: Partial<TxFields> }[] = [
 ];
 const EXAMPLE_SENDER = "0x1111111111111111111111111111111111111111";
 
-export function Scanner({ chains }: { chains: ChainOption[] }) {
-  const defaultChain = String(chains[0]?.id ?? 1);
-  const [mode, setMode] = useState<Mode>("params");
+export function Scanner({ chains, initialHash, initialChain }: { chains: ChainOption[]; initialHash?: string; initialChain?: number }) {
+  const defaultChain = String(initialChain && chains.some((c) => c.id === initialChain) ? initialChain : (chains[0]?.id ?? 1));
+  const [mode, setMode] = useState<Mode>(initialHash ? "hash" : "params");
   const [fields, setFields] = useState<TxFields>({ ...EMPTY, chainId: defaultChain });
   const [simulate, setSimulate] = useState(true);
   const [report, setReport] = useState<AnalysisResult | null>(null);
@@ -107,7 +107,7 @@ export function Scanner({ chains }: { chains: ChainOption[] }) {
             tabIndex={mode === m.id ? 0 : -1}
             onClick={() => setMode(m.id)}
             onKeyDown={(e) => onTabKey(e, i)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm ${mode === m.id ? "border-accent font-medium text-ink" : "border-transparent text-ink-2 hover:text-ink"}`}
+            className={`-mb-px border-b-2 px-3 py-2.5 text-[13px] ${mode === m.id ? "border-accent font-medium text-ink" : "border-transparent text-ink-3 hover:text-ink"}`}
           >
             {m.label}
           </button>
@@ -175,7 +175,7 @@ export function Scanner({ chains }: { chains: ChainOption[] }) {
                 <label className="flex items-center gap-2 text-sm text-ink-2">
                   <span>Example input (demo):</span>
                   <select
-                    className="rounded-md border border-line bg-surface px-2 py-1.5 text-sm text-ink"
+                    className="rounded-lg border border-line bg-page px-2 py-1.5 text-[13px] text-ink"
                     value=""
                     onChange={(e) => {
                       const ex = EXAMPLES[Number(e.target.value)];
@@ -218,7 +218,7 @@ export function Scanner({ chains }: { chains: ChainOption[] }) {
               <p className="text-sm text-ink-2">Fetches the transaction from the chain&apos;s RPC endpoint and fills in the parameters for review. Mined transactions are replayed on top of their parent block.</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(10rem,14rem)_1fr]">
                 <ChainSelect chains={chains.filter((c) => c.rpc)} value={fields.chainId} onChange={set("chainId")} error={fieldError("chainId")} requireRpc />
-                <Field label="Transaction hash" name="hash" placeholder="0x… (32 bytes)" mono required error={fieldError("hash")} />
+                <Field label="Transaction hash" name="hash" placeholder="0x… (32 bytes)" mono required error={fieldError("hash")} defaultValue={initialHash} />
               </div>
               <SubmitButton pending={pending}>Load transaction</SubmitButton>
             </form>
@@ -253,8 +253,8 @@ export function Scanner({ chains }: { chains: ChainOption[] }) {
       <div ref={resultRef} tabIndex={-1} aria-live="polite" className="outline-none">
         {pending && <p className="text-sm text-ink-2">Working… simulations can take a few seconds.</p>}
         {!pending && report && (
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-ink">Security report</h2>
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Security report</h2>
             <SecurityReport report={report} />
           </div>
         )}
@@ -268,21 +268,30 @@ export function Scanner({ chains }: { chains: ChainOption[] }) {
   );
 }
 
-const inputClass = "w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-3 aria-[invalid=true]:border-critical";
-
-function Field(props: { label: string; name: string; value?: string; onChange?: (e: { target: { value: string } }) => void; placeholder?: string; hint?: string; mono?: boolean; required?: boolean; error?: string }) {
+function Field(props: {
+  label: string;
+  name: string;
+  value?: string;
+  defaultValue?: string;
+  onChange?: (e: { target: { value: string } }) => void;
+  placeholder?: string;
+  hint?: string;
+  mono?: boolean;
+  required?: boolean;
+  error?: string;
+}) {
   const id = `f-${props.name}`;
   const describedBy = [props.hint ? `${id}-hint` : "", props.error ? `${id}-err` : ""].filter(Boolean).join(" ") || undefined;
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink">
+      <label htmlFor={id} className="mb-1.5 block text-[13px] font-medium text-ink-2">
         {props.label}
         {props.required && <span className="text-ink-3"> (required)</span>}
       </label>
       <input
         id={id}
         name={props.name}
-        {...(props.onChange ? { value: props.value ?? "", onChange: props.onChange } : {})}
+        {...(props.onChange ? { value: props.value ?? "", onChange: props.onChange } : { defaultValue: props.defaultValue })}
         placeholder={props.placeholder}
         required={props.required}
         autoComplete="off"
@@ -309,7 +318,7 @@ function TextArea(props: { label: string; name: string; value?: string; onChange
   const id = `f-${props.name}`;
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink">
+      <label htmlFor={id} className="mb-1.5 block text-[13px] font-medium text-ink-2">
         {props.label}
         {props.required && <span className="text-ink-3"> (required)</span>}
       </label>
@@ -347,7 +356,7 @@ function AbiField({ error }: { error?: string }) {
 function ChainSelect({ chains, value, onChange, error, requireRpc }: { chains: ChainOption[]; value: string; onChange: (e: { target: { value: string } }) => void; error?: string; requireRpc?: boolean }) {
   return (
     <div>
-      <label htmlFor="f-chainId" className="mb-1 block text-sm font-medium text-ink">
+      <label htmlFor="f-chainId" className="mb-1.5 block text-[13px] font-medium text-ink-2">
         Network
       </label>
       <select id="f-chainId" name="chainId" value={value} onChange={onChange} aria-invalid={error ? true : undefined} className={inputClass}>
@@ -365,7 +374,7 @@ function ChainSelect({ chains, value, onChange, error, requireRpc }: { chains: C
 
 function SubmitButton({ pending, children }: { pending: boolean; children: ReactNode }) {
   return (
-    <button type="submit" disabled={pending} aria-disabled={pending} className="rounded-md bg-btn px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60">
+    <button type="submit" disabled={pending} aria-disabled={pending} className={btnPrimary}>
       {pending ? "Working…" : children}
     </button>
   );

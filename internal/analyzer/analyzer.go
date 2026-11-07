@@ -9,12 +9,14 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"math/big"
 	"sort"
 	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 
+	"github.com/txshield/txshield/internal/evm"
 	"github.com/txshield/txshield/internal/security/approvals"
 	"github.com/txshield/txshield/internal/security/core"
 	"github.com/txshield/txshield/internal/security/reputation"
@@ -207,6 +209,7 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 		report.Approvals = []models.ApprovalGrant{}
 	}
 	if sim != nil {
+		a.annotateTokens(ctx, tx.ChainID, sim)
 		report.BalanceChanges = sim.BalanceChanges
 	}
 	report.Verdict = verdict(risk, findings)
@@ -319,4 +322,83 @@ func (a *Analyzer) Rules() []models.RuleMetadata { return a.d.Rules.Rules() }
 // Decode exposes the analyzer's decoder (offline, no chain access).
 func (a *Analyzer) Decode(ctx context.Context, tx *models.Transaction, opts interfaces.DecodeOptions) (*models.DecodedCall, error) {
 	return a.d.Decoder.Decode(ctx, tx, opts)
+}
+
+// Token metadata limits: display hints are not worth slowing a report down.
+const (
+	maxTokenMetadata     = 16
+	tokenMetadataTimeout = 3 * time.Second
+)
+
+// annotateTokens fills Symbol and Decimals on simulated token assets from
+// the token contracts themselves. It runs after the rules, which never read
+// these fields: they are self-reported by the contract, can be spoofed, and
+// are only display hints (the API schema and UI label them unverified).
+// Failures leave the fields empty.
+func (a *Analyzer) annotateTokens(ctx context.Context, chainID uint64, sim *models.SimulationResult) {
+	if a.d.Chains == nil || (len(sim.AssetTransfers) == 0 && len(sim.BalanceChanges) == 0) {
+		return
+	}
+	reader, err := a.d.Chains.Reader(chainID)
+	if err != nil {
+		return
+	}
+	type meta struct {
+		symbol   string
+		decimals *uint8
+	}
+	found := map[common.Address]*meta{}
+	var order []common.Address
+	collect := func(ref models.AssetRef) {
+		if ref.Kind == models.AssetNative || !common.IsHexAddress(ref.Address) || len(order) >= maxTokenMetadata {
+			return
+		}
+		addr := common.HexToAddress(ref.Address)
+		if _, seen := found[addr]; !seen {
+			found[addr] = nil
+			order = append(order, addr)
+		}
+	}
+	for _, t := range sim.AssetTransfers {
+		collect(t.Asset)
+	}
+	for _, b := range sim.BalanceChanges {
+		collect(b.Asset)
+	}
+	if len(order) == 0 {
+		return
+	}
+	var blk *big.Int
+	if sim.BlockNumber > 0 {
+		blk = new(big.Int).SetUint64(sim.BlockNumber)
+	}
+	mctx, cancel := context.WithTimeout(ctx, tokenMetadataTimeout)
+	defer cancel()
+	for _, addr := range order {
+		symbol, decimals, err := evm.TokenMetadata(mctx, reader, addr, blk)
+		if err != nil {
+			return // endpoint trouble: skip the rest rather than wait on each
+		}
+		found[addr] = &meta{symbol, decimals}
+	}
+	apply := func(ref *models.AssetRef) {
+		if ref.Kind == models.AssetNative || !common.IsHexAddress(ref.Address) {
+			return
+		}
+		m := found[common.HexToAddress(ref.Address)]
+		if m == nil {
+			return
+		}
+		ref.Symbol = m.symbol
+		// Decimals only make sense for fungible tokens.
+		if ref.Kind == models.AssetERC20 {
+			ref.Decimals = m.decimals
+		}
+	}
+	for i := range sim.AssetTransfers {
+		apply(&sim.AssetTransfers[i].Asset)
+	}
+	for i := range sim.BalanceChanges {
+		apply(&sim.BalanceChanges[i].Asset)
+	}
 }

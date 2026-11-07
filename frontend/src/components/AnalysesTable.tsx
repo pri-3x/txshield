@@ -4,10 +4,15 @@ import { chainName, formatDateTime } from "@/lib/format";
 import { EmptyState, Hex, RiskBadge, TableWrap, td, th } from "./ui";
 
 export function AnalysesTable({ page, empty, label = "Analyses" }: { page: AnalysisPage; empty: string; label?: string }) {
-  if (page.items.length === 0) return <EmptyState title={empty} />;
+  if (page.items.length === 0)
+    return (
+      <div className="p-4">
+        <EmptyState title={empty} />
+      </div>
+    );
   return (
     <TableWrap label={label}>
-      <table className="w-full min-w-[40rem] border-collapse">
+      <table className="w-full min-w-[44rem] border-collapse">
         <thead>
           <tr>
             <th className={th}>Analyzed</th>
@@ -15,14 +20,14 @@ export function AnalysesTable({ page, empty, label = "Analyses" }: { page: Analy
             <th className={th}>Target</th>
             <th className={th}>Method</th>
             <th className={th}>Chain</th>
-            <th className={th}>Findings</th>
+            <th className={`${th} text-right`}>Findings</th>
           </tr>
         </thead>
         <tbody>
           {page.items.map((a) => (
             <tr key={a.id}>
               <td className={td}>
-                <Link href={`/analyses/${a.id}`} className="text-accent-ink underline-offset-2 hover:underline">
+                <Link href={`/analyses/${a.id}`} className="whitespace-nowrap font-mono text-[12px] text-accent-ink underline-offset-2 hover:underline">
                   {formatDateTime(a.analyzedAt)}
                 </Link>
               </td>
@@ -34,12 +39,12 @@ export function AnalysesTable({ page, empty, label = "Analyses" }: { page: Analy
                 {a.method ? a.method.split("(")[0] : a.kind.replaceAll("_", " ")}
               </td>
               <td className={td}>{chainName(a.chainId)}</td>
-              <td className={`${td} tabular-nums`}>{a.findingCount}</td>
+              <td className={`${td} text-right font-mono tabular-nums`}>{a.findingCount}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      {page.total > page.items.length && <p className="mt-2 text-xs text-ink-3">Showing {page.items.length} of {page.total.toLocaleString("en-US")}.</p>}
+      {page.total > page.items.length && <p className="px-4 py-2.5 text-xs text-ink-3">Showing {page.items.length} of {page.total.toLocaleString("en-US")}.</p>}
     </TableWrap>
   );
 }

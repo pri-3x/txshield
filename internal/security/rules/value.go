@@ -214,7 +214,15 @@ func (r netLossRule) Evaluate(_ context.Context, ac *interfaces.AnalysisContext)
 	}
 	f := core.NewFinding(r.Metadata())
 	parts := []string{}
-	if nativeOut {
+	// The call's value usually also appears as a simulated native transfer
+	// from the sender; list it once.
+	nativeListed := false
+	for _, t := range outs {
+		if t.Asset.Kind == models.AssetNative {
+			nativeListed = true
+		}
+	}
+	if nativeOut && !nativeListed {
 		parts = append(parts, ac.Tx.Value.String()+" wei of native currency")
 	}
 	for _, t := range outs {

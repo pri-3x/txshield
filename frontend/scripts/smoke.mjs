@@ -134,15 +134,15 @@ try {
   check(critical.riskCategory === "critical" && transfer.riskScore === 0 && transfer.simulation?.backend === "anvil", "API produced real analyses (critical approval, simulated transfer)");
 
   const dash = await page(web, "/");
-  check(dash.status === 200 && dash.html.includes("Dashboard"), "dashboard renders");
+  check(dash.status === 200 && dash.html.includes("Overview"), "dashboard renders");
   check(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/.test(dash.csp) && !/script-src[^;]*unsafe-inline/.test(dash.csp), "strict nonce CSP on pages");
   const nonce = dash.csp.match(/'nonce-([^']+)'/)?.[1];
   const scripts = [...dash.html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
   check(scripts.length > 0 && scripts.every((s) => s.includes(`nonce="${nonce}"`)), `every script tag carries the request nonce (${scripts.length} scripts)`);
   if (db) {
-    check(dash.html.includes("Analyzed transactions") && dash.html.includes("Risk distribution"), "dashboard shows stats and charts");
+    check(dash.html.includes("High or critical") && dash.html.includes("Risk distribution"), "dashboard shows stats and charts");
     const report = await page(web, `/analyses/${critical.id}`);
-    const ok = report.status === 200 && report.html.includes("Security report") && report.html.includes("Interaction with a blocklisted address");
+    const ok = report.status === 200 && report.html.includes("Score breakdown") && report.html.includes("Interaction with a blocklisted address");
     check(ok, `stored report page renders findings (status ${report.status})`);
     if (!ok) console.log(report.html.replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500));
     await a11y(report.html, "report page");

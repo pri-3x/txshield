@@ -741,3 +741,38 @@ func TestAnvilWorkerRecoversFromCrash(t *testing.T) {
 		t.Fatalf("worker not restarted: before %q after %q", lines, after)
 	}
 }
+
+// Token symbol and decimals are read from the token contracts for display
+// (unverified), and the net-loss finding lists the call's ETH once.
+func TestReportTokenMetadataAndNativeOnce(t *testing.T) {
+	w := getWorld(t)
+	reg := w.registry()
+	a, err := analyzer.Build(analyzer.BuildOptions{Chains: reg, Inspector: evm.NewInspector(reg, 0), Simulator: newAnvil(t, w)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := a.Analyze(context.Background(), analyzer.Request{Tx: tx(victim, w.drainer, oneEther, cd("claim()")), Simulate: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sawToken bool
+	for _, b := range r.BalanceChanges {
+		if b.Asset.Kind == models.AssetERC20 && strings.EqualFold(b.Asset.Address, w.token.Hex()) {
+			sawToken = true
+			if b.Asset.Symbol != "TUSD" || b.Asset.Decimals == nil || *b.Asset.Decimals != 18 {
+				t.Fatalf("token metadata: %+v", b.Asset)
+			}
+		}
+		if b.Asset.Kind == models.AssetERC721 && b.Asset.Decimals != nil {
+			t.Fatalf("NFTs carry no decimals: %+v", b.Asset)
+		}
+	}
+	if !sawToken {
+		t.Fatalf("no ERC-20 balance change: %+v", r.BalanceChanges)
+	}
+	for _, f := range r.Findings {
+		if f.RuleID == "TXS-VALUE-003" && strings.Count(f.Description, "native") != 1 {
+			t.Fatalf("native listed more than once: %s", f.Description)
+		}
+	}
+}

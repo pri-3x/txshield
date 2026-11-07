@@ -299,6 +299,25 @@ func TestDrainerClaim(t *testing.T) {
 	}
 }
 
+// The call's value shows up both as tx.value and as a simulated native
+// transfer from the sender; the net-loss finding must list it once.
+func TestNetLossCountsNativeOnce(t *testing.T) {
+	transfers := []models.AssetTransfer{
+		{Asset: models.AssetRef{Kind: models.AssetNative}, From: user.Hex(), To: drainer.Hex(), Amount: "1000000000000000"},
+		erc20(usdc, user, attacker, "1000"),
+	}
+	got := runAll(t, ctxFor(t, drainer, 1e15, cd(t, "claim()"), sim(transfers, nil, nil)))
+	d := got["TXS-VALUE-003"][0].Description
+	if n := strings.Count(d, "native"); n != 1 {
+		t.Fatalf("native listed %d times: %s", n, d)
+	}
+	// Value sent with no simulated native transfer is still listed.
+	got = runAll(t, ctxFor(t, drainer, 1e15, cd(t, "claim()"), sim([]models.AssetTransfer{erc20(usdc, user, attacker, "1000")}, nil, nil)))
+	if d := got["TXS-VALUE-003"][0].Description; !strings.Contains(d, "1000000000000000 wei of native currency") {
+		t.Fatalf("missing native: %s", d)
+	}
+}
+
 func TestFalsePositive_SwapThroughPool(t *testing.T) {
 	// UR V3 swap: USDC goes to a pool that is not in calldata, WETH comes back.
 	path := append(append(usdc.Bytes(), 0x00, 0x01, 0xf4), weth.Bytes()...)

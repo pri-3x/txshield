@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { isTxShieldError, type AddressReport } from "@txshield/sdk";
 import { AnalysesTable } from "@/components/AnalysesTable";
-import { Card, EmptyState, Hex, KeyValue, Notice, TableWrap, td, th } from "@/components/ui";
+import { Card, EmptyState, Hex, KeyValue, Notice, PageHeader, TableWrap, btnPrimary, inputClass, td, th } from "@/components/ui";
 import { KNOWN_CHAINS, chainName, formatDateTime, visible } from "@/lib/format";
 import { txshield } from "@/lib/txshield";
 
@@ -28,23 +28,20 @@ export default async function AddressPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Address inspector</h1>
-        <p className="text-sm text-ink-2">On-chain facts, reputation, and analyses involving an address that this TxShield server has seen.</p>
-      </div>
+      <PageHeader title="Address inspector" subtitle="On-chain facts, reputation, and analyses involving an address that this TxShield server has seen." />
       <Card>
         <form method="get" className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_14rem_auto] sm:items-end">
           <div>
-            <label htmlFor="address" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="address" className="mb-1.5 block text-[13px] font-medium text-ink-2">
               Address
             </label>
-            <input id="address" name="address" defaultValue={address} placeholder="0x…" required spellCheck={false} autoComplete="off" className="w-full rounded-md border border-line bg-surface px-3 py-2 font-mono text-sm text-ink placeholder:text-ink-3" />
+            <input id="address" name="address" defaultValue={address} placeholder="0x…" required spellCheck={false} autoComplete="off" className={`${inputClass} font-mono`} />
           </div>
           <div>
-            <label htmlFor="chainId" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="chainId" className="mb-1.5 block text-[13px] font-medium text-ink-2">
               Network
             </label>
-            <select id="chainId" name="chainId" defaultValue={chainId} className="w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink">
+            <select id="chainId" name="chainId" defaultValue={chainId} className={inputClass}>
               {KNOWN_CHAINS.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name} ({c.id})
@@ -52,7 +49,7 @@ export default async function AddressPage({ searchParams }: { searchParams: Prom
               ))}
             </select>
           </div>
-          <button type="submit" className="rounded-md bg-btn px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+          <button type="submit" className={`${btnPrimary} justify-center`}>
             Inspect
           </button>
         </form>
@@ -127,12 +124,12 @@ export default async function AddressPage({ searchParams }: { searchParams: Prom
               )}
             </Card>
           </div>
-          <Card title="Analyses involving this address" id="history">
+          <Card title="Analyses involving this address" id="history" flush>
             {report.history ? (
               <>
                 <AnalysesTable page={report.history} empty="This server has not analyzed transactions involving this address." />
                 {(offset > 0 || report.history.total > offset + report.history.items.length) && (
-                  <nav aria-label="Pagination" className="mt-3 flex gap-3 text-sm">
+                  <nav aria-label="Pagination" className="flex gap-3 px-4 py-3 text-[13px]">
                     {offset > 0 && (
                       <a className="text-accent-ink hover:underline" href={`?address=${encodeURIComponent(address)}&chainId=${chainId}&offset=${Math.max(0, offset - 20)}`}>
                         ← Newer
@@ -147,9 +144,9 @@ export default async function AddressPage({ searchParams }: { searchParams: Prom
                 )}
               </>
             ) : (
-              <p className="text-sm text-ink-2">History is disabled on this server (no persistence).</p>
+              <p className="px-4 py-3 text-[13px] text-ink-3">History is disabled on this server (no persistence).</p>
             )}
-            <p className="mt-3 text-xs text-ink-3">
+            <p className="border-t border-line-2 px-4 py-3 text-xs text-ink-3">
               Token approvals listed here are limited to approvals seen in stored analyses. Use <code>txshield approval-check</code> to read the permissions currently in force for a specific token and spender.
             </p>
           </Card>

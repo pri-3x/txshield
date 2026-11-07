@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Notice } from "@/components/ui";
+import { Notice, PageHeader } from "@/components/ui";
 import { KNOWN_CHAINS } from "@/lib/format";
 import { txshield } from "@/lib/txshield";
 import { Scanner } from "./Scanner";
@@ -7,7 +7,10 @@ import { Scanner } from "./Scanner";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Transaction scanner" };
 
-export default async function ScanPage() {
+export default async function ScanPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
+  const initialHash = typeof sp.hash === "string" && /^0x[0-9a-fA-F]{64}$/.test(sp.hash) ? sp.hash : undefined;
+  const initialChain = typeof sp.chainId === "string" && /^\d{1,15}$/.test(sp.chainId) ? Number(sp.chainId) : undefined;
   let configured: number[] = [];
   let reachable = true;
   try {
@@ -21,12 +24,9 @@ export default async function ScanPage() {
   ];
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">Transaction scanner</h1>
-        <p className="text-sm text-ink-2">Analyze a transaction before signing it. Nothing is signed or broadcast. Chains without an RPC endpoint are analyzed offline (no simulation).</p>
-      </div>
+      <PageHeader title="Transaction scanner" subtitle="Analyze a transaction before signing it. Nothing is signed or broadcast. Chains without an RPC endpoint are analyzed offline (no simulation)." />
       {!reachable && <Notice tone="critical" title="The TxShield API is not reachable; analysis requests will fail." />}
-      <Scanner chains={chains} />
+      <Scanner chains={chains} initialHash={initialHash} initialChain={initialChain} />
     </div>
   );
 }
