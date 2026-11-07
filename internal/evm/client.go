@@ -14,10 +14,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/txshield/txshield/internal/config"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/config"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // upstreamMethods is the complete set of JSON-RPC methods TxShield may call

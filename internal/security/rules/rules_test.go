@@ -12,11 +12,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/internal/decoder"
-	"github.com/txshield/txshield/internal/security/approvals"
-	"github.com/txshield/txshield/internal/security/core"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/decoder"
+	"github.com/pri-3x/txshield/internal/security/approvals"
+	"github.com/pri-3x/txshield/internal/security/core"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 var (
@@ -296,6 +296,25 @@ func TestDrainerClaim(t *testing.T) {
 	}
 	if got["TXS-VALUE-004"][0].Confidence != models.ConfidenceLow {
 		t.Fatal("value to unrecognized function must be low confidence")
+	}
+}
+
+// The call's value shows up both as tx.value and as a simulated native
+// transfer from the sender; the net-loss finding must list it once.
+func TestNetLossCountsNativeOnce(t *testing.T) {
+	transfers := []models.AssetTransfer{
+		{Asset: models.AssetRef{Kind: models.AssetNative}, From: user.Hex(), To: drainer.Hex(), Amount: "1000000000000000"},
+		erc20(usdc, user, attacker, "1000"),
+	}
+	got := runAll(t, ctxFor(t, drainer, 1e15, cd(t, "claim()"), sim(transfers, nil, nil)))
+	d := got["TXS-VALUE-003"][0].Description
+	if n := strings.Count(d, "native"); n != 1 {
+		t.Fatalf("native listed %d times: %s", n, d)
+	}
+	// Value sent with no simulated native transfer is still listed.
+	got = runAll(t, ctxFor(t, drainer, 1e15, cd(t, "claim()"), sim([]models.AssetTransfer{erc20(usdc, user, attacker, "1000")}, nil, nil)))
+	if d := got["TXS-VALUE-003"][0].Description; !strings.Contains(d, "1000000000000000 wei of native currency") {
+		t.Fatalf("missing native: %s", d)
 	}
 }
 

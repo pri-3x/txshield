@@ -1,0 +1,15 @@
+{
+  "name": "@txshield/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TxShield browser extension (Chrome/Edge/Brave, Manifest V3)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "vitest run",
+    "package": "node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}

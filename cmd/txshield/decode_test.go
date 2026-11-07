@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 const approveMax = "0x095ea7b30000000000000000000000002222222222222222222222222222222222222222ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"

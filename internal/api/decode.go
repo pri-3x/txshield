@@ -8,7 +8,7 @@ import (
 	"mime"
 	"net/http"
 
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // decodeJSON strictly decodes a single JSON object from the request body:

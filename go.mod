@@ -1,4 +1,4 @@
-module github.com/txshield/txshield
+module github.com/pri-3x/txshield
 
 go 1.26.0
 

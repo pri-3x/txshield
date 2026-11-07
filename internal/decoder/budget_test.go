@@ -13,8 +13,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 func word(n int) []byte { return common.LeftPadBytes(big.NewInt(int64(n)).Bytes(), 32) }

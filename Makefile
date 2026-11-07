@@ -3,8 +3,8 @@ GO      ?= go
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 LDFLAGS := -s -w \
-  -X github.com/txshield/txshield/internal/version.Version=$(VERSION) \
-  -X github.com/txshield/txshield/internal/version.Commit=$(COMMIT)
+  -X github.com/pri-3x/txshield/internal/version.Version=$(VERSION) \
+  -X github.com/pri-3x/txshield/internal/version.Commit=$(COMMIT)
 
 # Integration tests need a Postgres. Defaults to the docker compose instance.
 TEST_DATABASE_URL ?= postgres://txshield:txshield@localhost:55432/txshield?sslmode=disable

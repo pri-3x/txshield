@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/txshield/txshield/internal/logging"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/logging"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // ErrorBody is the JSON shape of every error response.

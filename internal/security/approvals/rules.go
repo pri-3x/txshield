@@ -8,10 +8,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/internal/security/core"
-	"github.com/txshield/txshield/internal/security/reputation"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/security/core"
+	"github.com/pri-3x/txshield/internal/security/reputation"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // Config tunes approval heuristics.

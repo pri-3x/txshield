@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/txshield/txshield/internal/security/reputation"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/security/reputation"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // TestPostgresReputationProvider applies the schema in an isolated schema and

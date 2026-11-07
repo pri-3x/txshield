@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // Event topics, computed from their signatures so they cannot be mistyped.

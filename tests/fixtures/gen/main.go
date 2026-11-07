@@ -15,9 +15,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/txshield/txshield/internal/decoder"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/tests/fixtures"
+	"github.com/pri-3x/txshield/internal/decoder"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/tests/fixtures"
 )
 
 var (

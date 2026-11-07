@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/txshield/txshield/internal/version"
+	"github.com/pri-3x/txshield/internal/version"
 )
 
 // CheckResult is the outcome of one dependency check.

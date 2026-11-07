@@ -1,0 +1,117 @@
+# TxShield production stack for a single VM (built for Oracle Cloud Always
+# Free ARM instances; works on any Linux host with Docker).
+#
+#   deploy/oracle/setup.sh   # first time: installs Docker, writes .env
+#   docker compose -f deploy/oracle/docker-compose.yml --env-file deploy/oracle/.env up -d --build
+#
+# Only Caddy is reachable from the internet (ports 80/443, automatic HTTPS).
+# The API requires an API key, the dashboard requires HTTP Basic auth, and
+# /metrics and the database are never exposed.
+name: txshield
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: txshield
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run setup.sh first}
+      POSTGRES_DB: txshield
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U txshield -d txshield"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    image: migrate/migrate:v4.18.1
+    command: ["-path=/migrations", "-database", "postgres://txshield:${POSTGRES_PASSWORD}@postgres:5432/txshield?sslmode=disable", "up"]
+    volumes:
+      - ../../migrations:/migrations:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ../..
+      args:
+        VERSION: ${TXSHIELD_VERSION:-dev}
+    environment:
+      TXSHIELD_HTTP_ADDR: ":8080"
+      TXSHIELD_RPC_URLS: ${TXSHIELD_RPC_URLS:?set TXSHIELD_RPC_URLS in deploy/oracle/.env}
+      TXSHIELD_DATABASE_URL: postgres://txshield:${POSTGRES_PASSWORD}@postgres:5432/txshield?sslmode=disable
+      TXSHIELD_API_KEYS: ${TXSHIELD_API_KEYS:?run setup.sh first}
+      TXSHIELD_REPUTATION_FILES: /etc/txshield/example-blocklist.json
+      # Behind Caddy: the client IP is the last X-Forwarded-For hop.
+      TXSHIELD_TRUST_PROXY_HEADERS: "true"
+      # Simulations are the expensive part: modest per-client limits.
+      TXSHIELD_RATE_LIMIT_RPS: "1"
+      TXSHIELD_RATE_LIMIT_BURST: "10"
+      TXSHIELD_SIMULATION_MAX_CONCURRENT: "2"
+      TXSHIELD_RETENTION_DAYS: "14"
+      TXSHIELD_LOG_LEVEL: info
+    volumes:
+      - ../../configs/reputation/example-blocklist.json:/etc/txshield/example-blocklist.json:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+          cpus: "1.5"
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ../..
+      dockerfile: frontend/Dockerfile
+    environment:
+      TXSHIELD_API_URL: http://api:8080
+      TXSHIELD_API_KEY: ${TXSHIELD_DASHBOARD_API_KEY:?run setup.sh first}
+      TXSHIELD_DASHBOARD_BASIC_AUTH: ${TXSHIELD_DASHBOARD_BASIC_AUTH:?run setup.sh first}
+    depends_on:
+      api:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.11.6-alpine
+    environment:
+      API_HOST: ${API_HOST:?run setup.sh first}
+      APP_HOST: ${APP_HOST:?run setup.sh first}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - dashboard
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

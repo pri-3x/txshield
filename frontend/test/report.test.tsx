@@ -55,7 +55,7 @@ describe("SecurityReport", () => {
     render(<SecurityReport report={fixture} />);
     expect(screen.getByText("89")).toBeTruthy();
     expect(screen.getAllByText(/Critical/).length).toBeGreaterThan(0);
-    expect(screen.getByText("Findings (2)")).toBeTruthy();
+    expect(screen.getByText("Findings · 2")).toBeTruthy();
     expect(screen.getByText("Approval to a flagged spender")).toBeTruthy();
     expect(screen.getAllByText(/Unlimited \(2²⁵⁶−1\)/).length).toBeGreaterThanOrEqual(2); // decoded param + approvals table
     expect(screen.getByText(/contract facts were not checked/)).toBeTruthy();

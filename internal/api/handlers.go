@@ -7,13 +7,13 @@ import (
 	"slices"
 	"time"
 
-	"github.com/txshield/txshield/internal/analyzer"
-	"github.com/txshield/txshield/internal/logging"
-	"github.com/txshield/txshield/internal/security/approvals"
-	"github.com/txshield/txshield/internal/security/scoring"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/analyzer"
+	"github.com/pri-3x/txshield/internal/logging"
+	"github.com/pri-3x/txshield/internal/security/approvals"
+	"github.com/pri-3x/txshield/internal/security/scoring"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 func (s *Server) engineOr503(w http.ResponseWriter, r *http.Request) *Engine {

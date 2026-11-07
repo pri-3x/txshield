@@ -10,12 +10,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/txshield/txshield/internal/config"
-	"github.com/txshield/txshield/internal/evm"
-	"github.com/txshield/txshield/internal/metrics"
-	"github.com/txshield/txshield/internal/version"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/evm"
+	"github.com/pri-3x/txshield/internal/metrics"
+	"github.com/pri-3x/txshield/internal/version"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // Deps are the server's injected dependencies.

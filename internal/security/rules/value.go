@@ -9,9 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/internal/security/core"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/security/core"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // simUsable reports whether simulation produced executed state changes that
@@ -214,7 +214,15 @@ func (r netLossRule) Evaluate(_ context.Context, ac *interfaces.AnalysisContext)
 	}
 	f := core.NewFinding(r.Metadata())
 	parts := []string{}
-	if nativeOut {
+	// The call's value usually also appears as a simulated native transfer
+	// from the sender; list it once.
+	nativeListed := false
+	for _, t := range outs {
+		if t.Asset.Kind == models.AssetNative {
+			nativeListed = true
+		}
+	}
+	if nativeOut && !nativeListed {
 		parts = append(parts, ac.Tx.Value.String()+" wei of native currency")
 	}
 	for _, t := range outs {

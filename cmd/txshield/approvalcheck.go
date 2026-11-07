@@ -11,11 +11,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/internal/evm"
-	"github.com/txshield/txshield/internal/security/approvals"
-	"github.com/txshield/txshield/internal/security/reputation"
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/internal/evm"
+	"github.com/pri-3x/txshield/internal/security/approvals"
+	"github.com/pri-3x/txshield/internal/security/reputation"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // PermissionState is one permission currently in force.

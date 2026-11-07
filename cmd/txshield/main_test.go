@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/txshield/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/config"
 )
 
 func TestRunDispatch(t *testing.T) {

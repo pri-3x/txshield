@@ -6,21 +6,32 @@ TxShield. All data comes from the TxShield API through
 flows. The scanner's "Example input (demo)" menu only pre-fills form fields;
 the analysis is always real.
 
+The UI is an analyst console: a dark, dense layout of panels with
+uppercase header bars, built for reviewing many transactions. The header
+search takes a transaction hash (opens it in the scanner), an address (opens
+the address inspector), or an analysis ID.
+
 | Page | What it shows |
 |---|---|
-| `/` Dashboard | Totals, high-risk count, risk and chain distribution, high-risk and recent analyses (needs API persistence) |
+| `/` Overview | Totals, high-risk count, risk and chain distribution, high-risk and recent analyses (needs API persistence) |
 | `/scan` Scanner | Analyze from **transaction parameters**, a **transaction hash** (looked up, then replayed on its parent block), or **calldata only** (offline decode). The result is the full security report. |
 | `/analyses` | History with risk filters and pagination |
 | `/analyses/{id}` | Stored security report |
 | `/address` | Address inspector: on-chain facts, reputation records, analyses involving the address |
 
-The security report shows:
+The security report is a summary bar over three columns (one column on a
+phone):
 
-- score, band and confidence, with per-finding contributions
-- findings with severity, confidence, source (fact / heuristic / external), evidence, mitigation and false-positive notes
-- token permissions, including whether each is in force now
-- simulation status, gas, sender balance changes, asset transfers, call trace and notes
-- the decoded call tree, recommendations, limitations and the disclaimer
+- **Summary bar:** score tile, band, confidence, verdict, top finding,
+  from / to / value / call / chain and block, copy link and JSON download.
+- **Left:** score breakdown (points per rule, with how they combine) and
+  coverage (simulation, rules that ran, gas, timing, enabled checks).
+- **Middle:** findings table sorted by severity, with source (fact /
+  heuristic / external), confidence and points; each row expands to its
+  evidence, mitigation and false-positive notes. Then recommendations,
+  token permissions (with whether each is in force now) and the decoded call.
+- **Right:** sender balance diff, asset transfers, and the call trace, with
+  standard selectors named from a fixed table of exact selectors.
 
 ## Run
 
@@ -57,9 +68,11 @@ Compose (`docker compose up` serves it on http://localhost:3000).
   - passed through `visible()`, which shows bidi overrides, zero-width
     characters and control characters as `\uXXXX` so they cannot disguise
     text
-- **Tokens are identified by address only.** Amounts are raw base units,
-  because token decimals are not trusted. Native amounts are formatted with
-  exact `bigint` math, and the unlimited sentinels are named explicitly.
+- **Tokens are identified by address.** The API attaches the symbol and
+  decimals the token contract reports. Any contract can claim to be "USDC",
+  so the UI marks them with `*` and "unverified", and without reported
+  decimals it shows raw base units rather than guessing. Amounts use exact
+  `bigint` math, and the unlimited sentinels are named explicitly.
 - **Server actions are endpoints.** Anyone who can reach the dashboard can run
   analyses and read history through it, with the dashboard's API key. Compose
   binds it to 127.0.0.1; before exposing it, set
@@ -78,14 +91,16 @@ Compose (`docker compose up` serves it on http://localhost:3000).
   view.
 - Status is never conveyed by color alone (labels and icons).
 - `prefers-reduced-motion` is respected.
-- Light and dark themes use separately chosen steps from a validated palette.
+- Dark console theme only. Every text and background pair was computed
+  against WCAG AA (lowest text pair 5.85:1; tags 7.1:1 or more; the chart
+  bar 4.98:1 against panels).
 
 Automated checks:
 
 - axe-core on rendered components (`npm test`)
 - axe-core on every server-rendered page (`npm run test:smoke`)
 
-Color contrast was checked visually, because jsdom has no layout.
+Contrast ratios were computed from the palette, because jsdom has no layout.
 
 ## Tests
 

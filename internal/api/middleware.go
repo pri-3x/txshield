@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/txshield/txshield/internal/logging"
-	"github.com/txshield/txshield/internal/metrics"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/internal/logging"
+	"github.com/pri-3x/txshield/internal/metrics"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // RequestIDHeader carries the request ID in both directions.

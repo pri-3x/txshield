@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/txshield/txshield/internal/config"
+	"github.com/pri-3x/txshield/internal/config"
 )
 
 func TestRateLimiterBucket(t *testing.T) {
@@ -65,7 +65,7 @@ func TestRateKeyGroupsIPv6Subnets(t *testing.T) {
 }
 
 func TestClientIP(t *testing.T) {
-	r := httptest.NewRequest("GET", "/", nil)
+	r := httptest.NewRequestWithContext(t.Context(), "GET", "/", nil)
 	r.RemoteAddr = "203.0.113.9:4444"
 	r.Header.Set("X-Forwarded-For", "1.2.3.4, 198.51.100.7")
 	if got := clientIP(r, false); got != "203.0.113.9" {

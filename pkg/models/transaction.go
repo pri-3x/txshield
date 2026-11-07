@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // Quantity is an unsigned or signed integer carried as a decimal string in

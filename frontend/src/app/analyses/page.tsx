@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { isTxShieldError, type AnalysisPage } from "@txshield/sdk";
 import { AnalysesTable } from "@/components/AnalysesTable";
-import { Card, Notice } from "@/components/ui";
+import { Card, Notice, PageHeader } from "@/components/ui";
 import { CATEGORY } from "@/lib/risk";
 import { txshield } from "@/lib/txshield";
 
@@ -32,12 +32,12 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-ink">Analysis history</h1>
-      <nav aria-label="Filter by risk" className="flex flex-wrap gap-2 text-sm">
+      <PageHeader title="Analysis history" subtitle={page ? `${page.total.toLocaleString("en-US")} stored analyses${minScore !== undefined ? ` with score ${minScore}+` : ""}` : undefined} />
+      <nav aria-label="Filter by risk" className="flex flex-wrap gap-1.5 text-[13px]">
         {FILTERS.map((f) => {
           const active = f.minScore === minScore;
           return (
-            <Link key={f.label} href={href(0, f.minScore)} aria-current={active ? "page" : undefined} className={`rounded-full border px-3 py-1 ${active ? "border-accent text-ink" : "border-line text-ink-2 hover:text-ink"}`}>
+            <Link key={f.label} href={href(0, f.minScore)} aria-current={active ? "page" : undefined} className={`rounded-lg border px-3 py-1.5 ${active ? "border-accent bg-surface-2 text-ink" : "border-line text-ink-3 hover:text-ink"}`}>
               {f.label}
             </Link>
           );
@@ -45,9 +45,9 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
       </nav>
       {error && <Notice tone={page ? "warning" : "neutral"} title={error} />}
       {page && (
-        <Card>
+        <Card flush>
           <AnalysesTable page={page} empty="No analyses match." label="Analysis history" />
-          <nav aria-label="Pagination" className="mt-3 flex items-center gap-4 text-sm">
+          <nav aria-label="Pagination" className="flex items-center gap-4 px-4 py-3 text-[13px]">
             {offset > 0 && (
               <Link className="text-accent-ink hover:underline" href={href(Math.max(0, offset - PAGE))}>
                 ← Newer

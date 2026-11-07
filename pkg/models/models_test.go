@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 func TestParseAddress(t *testing.T) {

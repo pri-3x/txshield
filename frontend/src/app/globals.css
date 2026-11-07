@@ -1,51 +1,48 @@
 @import "tailwindcss";
 
-/* Design tokens. Values follow the validated reference data-viz palette:
-   light and dark are each selected steps, not an automatic inversion. */
+/* Analyst console theme (dark). Contrast was computed for every text pair
+   (WCAG AA: >= 4.5:1 for text, >= 3:1 for the chart bar against panels):
+   ink-3 on panel 7.2:1, every tag 7.1:1 or more, white on button 8.2:1. */
 :root {
-  color-scheme: light;
-  --page: #f9f9f7;
-  --surface: #fcfcfb;
-  --surface-2: #f0efec;
-  --line: #dddcd7;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --ink-3: #6b6a66;
-  --accent: #2a78d6;
-  --accent-ink: #1c5cab;
-  --btn: #1c5cab; /* white text 6.6:1 */
-  --bar: #2a78d6;
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
-  --critical: #d03b3b;
-  --good-ink: #006300;
-  --warning-ink: #7a5200;
-  --serious-ink: #9c3f19;
-  --critical-ink: #a82626;
-  --focus: #2a78d6;
-}
+  color-scheme: dark;
+  --page: #0b0e13;
+  --surface: #12161d; /* panels */
+  --surface-2: #181e27; /* inputs, hover, nested blocks */
+  --line: #262e3a;
+  --line-2: #1c222c; /* row separators */
+  --ink: #e6eaf0;
+  --ink-2: #c1c9d4;
+  --ink-3: #9aa4b2;
+  --accent: #7cb4ff;
+  --accent-ink: #8fc0ff;
+  --btn: #1f4f8f;
+  --btn-hover: #2b65b0;
+  --bar: #3987e5;
+  --focus: #8fc0ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --page: #0d0d0d;
-    --surface: #1a1a19;
-    --surface-2: #262624;
-    --line: #383835;
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --ink-3: #a3a29a;
-    --accent: #3987e5;
-    --accent-ink: #86b6ef;
-    --btn: #2a78d6; /* white text 4.6:1 */
-    --bar: #3987e5;
-    --good-ink: #5fd35f;
-    --warning-ink: #fab219;
-    --serious-ink: #f2a07f;
-    --critical-ink: #f08a8a;
-    --focus: #86b6ef;
-  }
+  /* Status: marker (fill), ink (text) and tag background. */
+  --good: #34c77b;
+  --good-ink: #6ee7a0;
+  --good-bg: #0f2e1f;
+  --warning: #f5a524;
+  --warning-ink: #ffc266;
+  --warning-bg: #3a2a0c;
+  --serious: #f0743e;
+  --serious-ink: #ffa77a;
+  --serious-bg: #3a1f12;
+  --critical: #e5484d;
+  --critical-ink: #ff8a80;
+  --critical-bg: #3a1418;
+  --neutral-ink: #b4becc;
+  --neutral-bg: #1e2633;
+
+  /* Evidence source. */
+  --fact-ink: #8cc2ff;
+  --fact-bg: #0f2a44;
+  --heur-ink: #c5b3ff;
+  --heur-bg: #2a2140;
+  --ext-ink: #7ee0c3;
+  --ext-bg: #0e2e2a;
 }
 
 @theme inline {
@@ -53,12 +50,14 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-line: var(--line);
+  --color-line-2: var(--line-2);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-btn: var(--btn);
+  --color-btn-hover: var(--btn-hover);
   --color-good: var(--good);
   --color-warning: var(--warning);
   --color-serious: var(--serious);
@@ -67,8 +66,20 @@
   --color-warning-ink: var(--warning-ink);
   --color-serious-ink: var(--serious-ink);
   --color-critical-ink: var(--critical-ink);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --color-neutral-ink: var(--neutral-ink);
+  --color-good-bg: var(--good-bg);
+  --color-warning-bg: var(--warning-bg);
+  --color-serious-bg: var(--serious-bg);
+  --color-critical-bg: var(--critical-bg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-fact-ink: var(--fact-ink);
+  --color-fact-bg: var(--fact-bg);
+  --color-heur-ink: var(--heur-ink);
+  --color-heur-bg: var(--heur-bg);
+  --color-ext-ink: var(--ext-ink);
+  --color-ext-bg: var(--ext-bg);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 html {
@@ -81,10 +92,20 @@ body {
   min-height: 100dvh;
 }
 
+::selection {
+  background: #2b65b0;
+  color: #ffffff;
+}
+
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: 3px;
+}
+
+/* Scrollbars that match the console. */
+* {
+  scrollbar-color: #2c3442 transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

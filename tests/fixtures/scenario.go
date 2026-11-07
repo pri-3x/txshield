@@ -17,7 +17,7 @@ import (
 	"runtime"
 	"sort"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // Scenario is one fixture.

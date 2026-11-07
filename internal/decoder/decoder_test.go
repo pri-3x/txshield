@@ -2,6 +2,7 @@ package decoder
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"math/big"
 	"strings"
@@ -9,9 +10,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 var (
@@ -283,7 +284,7 @@ func v3Path(tokens []common.Address, fees []uint32) []byte {
 	for i, tk := range tokens {
 		p = append(p, tk.Bytes()...)
 		if i < len(fees) {
-			p = append(p, byte(fees[i]>>16), byte(fees[i]>>8), byte(fees[i]))
+			p = append(p, binary.BigEndian.AppendUint32(nil, fees[i])[1:]...) // uint24 fee
 		}
 	}
 	return p

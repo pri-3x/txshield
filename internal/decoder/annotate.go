@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // DerivedParamType marks parameters TxShield computed from other parameters

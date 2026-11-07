@@ -1,0 +1,606 @@
+{
+    "id": "c5792360-ae99-4910-9f5f-05a5fb6de4de",
+    "requestId": "8e054568790f50a0172d1576",
+    "engineVersion": "0c8f4a5-dirty",
+    "analyzedAt": "2026-11-07T10:21:13.979251Z",
+    "transaction": {
+        "chainId": 31337,
+        "chainName": "Anvil (local)",
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "value": "10000000000000000",
+        "kind": "unknown",
+        "description": "Call unrecognized function 0x4e71d92d on 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9, sending 10000000000000000 wei",
+        "block": "7"
+    },
+    "decoded": {
+        "kind": "unknown",
+        "callType": "call",
+        "target": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "value": "10000000000000000",
+        "selector": "0x4e71d92d",
+        "source": "none",
+        "rawData": "0x4e71d92d"
+    },
+    "risk": {
+        "score": 81,
+        "category": "critical",
+        "confidence": "high",
+        "contributions": [
+            {
+                "fingerprint": "TXS-VALUE-001:erc20:0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0|0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+                "ruleId": "TXS-VALUE-001",
+                "points": 33.75,
+                "reason": "high severity (45) x medium confidence (0.75) x fact source (1.00)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-002",
+                "ruleId": "TXS-VALUE-002",
+                "points": 33.75,
+                "reason": "high severity (45) x medium confidence (0.75) x fact source (1.00)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-003",
+                "ruleId": "TXS-VALUE-003",
+                "points": 33.75,
+                "reason": "high severity (45) x medium confidence (0.75) x fact source (1.00)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-001:erc721:0x5fbdb2315678afecb367f032d93f642f64180aa3#1|0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+                "ruleId": "TXS-VALUE-001",
+                "points": 16.88,
+                "reason": "high severity (45) x medium confidence (0.75) x fact source (1.00) x repeat decay 0.500 (finding 2 of this rule)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-004:0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+                "ruleId": "TXS-VALUE-004",
+                "points": 9.9,
+                "reason": "medium severity (22) x low confidence (0.50) x heuristic source (0.90)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-005:erc20:0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+                "ruleId": "TXS-VALUE-005",
+                "points": 8,
+                "reason": "low severity (8) x high confidence (1.00) x fact source (1.00)"
+            },
+            {
+                "fingerprint": "TXS-VALUE-005:erc721:0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                "ruleId": "TXS-VALUE-005",
+                "points": 4,
+                "reason": "low severity (8) x high confidence (1.00) x fact source (1.00) x repeat decay 0.500 (finding 2 of this rule)"
+            },
+            {
+                "fingerprint": "TXS-INTERACT-003:0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+                "ruleId": "TXS-INTERACT-003",
+                "points": 3.6,
+                "reason": "low severity (8) x low confidence (0.50) x heuristic source (0.90)"
+            },
+            {
+                "fingerprint": "TXS-INTERACT-006",
+                "ruleId": "TXS-INTERACT-006",
+                "points": 0,
+                "reason": "info severity (0) x low confidence (0.50) x heuristic source (0.90)"
+            }
+        ]
+    },
+    "verdict": "Critical risk: 8 finding(s) require review before signing.",
+    "findings": [
+        {
+            "ruleId": "TXS-VALUE-001",
+            "title": "Unexpected asset leaves the wallet",
+            "description": "1000000000000000000000 of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 leaves the sender to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC, but the token is not referenced in the calldata. The recipient is not referenced either.",
+            "category": "value_transfer",
+            "severity": "high",
+            "confidence": "medium",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1000000000000000000000 of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1000000000000000000000",
+                        "asset": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc20",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                }
+            ],
+            "subjects": [
+                "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+            ],
+            "mitigation": "Do not sign unless you expect this token to leave your wallet. Revoke existing approvals for it if this came from an untrusted site.",
+            "falsePositiveNotes": "Protocols that derive tokens on-chain (e.g. vault share redemptions, fee-on-transfer side effects) can move tokens not named in calldata. For undecoded calls, any address-shaped argument counts as referenced, so a drainer that receives token addresses as arguments is caught by TXS-VALUE-002/003 instead. Requires simulation.",
+            "fingerprint": "TXS-VALUE-001:erc20:0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0|0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"
+        },
+        {
+            "ruleId": "TXS-VALUE-001",
+            "title": "Unexpected asset leaves the wallet",
+            "description": "1 of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 #1 leaves the sender to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC, but the token is not referenced in the calldata. The recipient is not referenced either.",
+            "category": "value_transfer",
+            "severity": "high",
+            "confidence": "medium",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1 of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 #1 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1",
+                        "asset": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc721",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                }
+            ],
+            "subjects": [
+                "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+            ],
+            "mitigation": "Do not sign unless you expect this token to leave your wallet. Revoke existing approvals for it if this came from an untrusted site.",
+            "falsePositiveNotes": "Protocols that derive tokens on-chain (e.g. vault share redemptions, fee-on-transfer side effects) can move tokens not named in calldata. For undecoded calls, any address-shaped argument counts as referenced, so a drainer that receives token addresses as arguments is caught by TXS-VALUE-002/003 instead. Requires simulation.",
+            "fingerprint": "TXS-VALUE-001:erc721:0x5fbdb2315678afecb367f032d93f642f64180aa3#1|0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc"
+        },
+        {
+            "ruleId": "TXS-VALUE-002",
+            "title": "Several different assets leave the wallet",
+            "description": "3 distinct assets leave the sender: erc20:0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0, erc721:0x5fbdb2315678afecb367f032d93f642f64180aa3#1, native:",
+            "category": "value_transfer",
+            "severity": "high",
+            "confidence": "medium",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1000000000000000000000 of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1000000000000000000000",
+                        "asset": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc20",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                },
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1 of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 #1 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1",
+                        "asset": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc721",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                }
+            ],
+            "mitigation": "Review every outgoing asset in the simulation before signing.",
+            "falsePositiveNotes": "Intentional batch payouts, portfolio migrations, and multi-asset deposits also move several assets.",
+            "fingerprint": "TXS-VALUE-002"
+        },
+        {
+            "ruleId": "TXS-VALUE-003",
+            "title": "Assets leave the wallet and nothing comes back",
+            "description": "The sender gives away 10000000000000000 of native currency, 1000000000000000000000 of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0, 1 of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 #1 and receives no assets in the simulation.",
+            "category": "value_transfer",
+            "severity": "high",
+            "confidence": "medium",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_transfer",
+                    "detail": "10000000000000000 of native currency from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "source": "fact",
+                    "data": {
+                        "amount": "10000000000000000",
+                        "asset": "",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "native",
+                        "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+                    }
+                },
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1000000000000000000000 of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1000000000000000000000",
+                        "asset": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc20",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                },
+                {
+                    "type": "simulation_transfer",
+                    "detail": "1 of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 #1 from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 to 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "source": "fact",
+                    "data": {
+                        "amount": "1",
+                        "asset": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "kind": "erc721",
+                        "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+                    }
+                }
+            ],
+            "mitigation": "Make sure you intend to give these assets away. Legitimate swaps, mints, and claims return something.",
+            "falsePositiveNotes": "Donations, fee payments, repaying loans, bridging (the return arrives on another chain), and deposits into protocols that track balances internally also match.",
+            "fingerprint": "TXS-VALUE-003"
+        },
+        {
+            "ruleId": "TXS-VALUE-004",
+            "title": "Native currency sent to a non-payable or unrecognized function",
+            "description": "10000000000000000 wei sent with unrecognized function 0x4e71d92d.",
+            "category": "value_transfer",
+            "severity": "medium",
+            "confidence": "low",
+            "source": "heuristic",
+            "subjects": [
+                "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+            ],
+            "mitigation": "Check why this call needs native currency. Token approvals and transfers never require it.",
+            "falsePositiveNotes": "Many legitimate unrecognized functions are payable (mints, deposits, bridge fees). Confidence is low for unrecognized functions.",
+            "fingerprint": "TXS-VALUE-004:0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+        },
+        {
+            "ruleId": "TXS-VALUE-005",
+            "title": "Entire token balance leaves the wallet",
+            "description": "Balance of erc20 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 goes from 1000000000000000000000 to 0.",
+            "category": "value_transfer",
+            "severity": "low",
+            "confidence": "high",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_balance",
+                    "detail": "pre/post balance from simulation",
+                    "source": "fact",
+                    "data": {
+                        "after": "0",
+                        "asset": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                        "before": "1000000000000000000000"
+                    }
+                }
+            ],
+            "subjects": [
+                "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+            ],
+            "mitigation": "Confirm you intend to move your full balance of this token.",
+            "falsePositiveNotes": "Selling or moving a full position is common. Combined with other findings it is a draining signal.",
+            "fingerprint": "TXS-VALUE-005:erc20:0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+        },
+        {
+            "ruleId": "TXS-VALUE-005",
+            "title": "Entire token balance leaves the wallet",
+            "description": "Balance of erc721 0x5FbDB2315678afecb367f032d93F642f64180aa3 goes from 1 to 0.",
+            "category": "value_transfer",
+            "severity": "low",
+            "confidence": "high",
+            "source": "fact",
+            "evidence": [
+                {
+                    "type": "simulation_balance",
+                    "detail": "pre/post balance from simulation",
+                    "source": "fact",
+                    "data": {
+                        "after": "0",
+                        "asset": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                        "before": "1"
+                    }
+                }
+            ],
+            "subjects": [
+                "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+            ],
+            "mitigation": "Confirm you intend to move your full balance of this token.",
+            "falsePositiveNotes": "Selling or moving a full position is common. Combined with other findings it is a draining signal.",
+            "fingerprint": "TXS-VALUE-005:erc721:0x5fbdb2315678afecb367f032d93f642f64180aa3"
+        },
+        {
+            "ruleId": "TXS-INTERACT-003",
+            "title": "Target contract has no reputation record",
+            "description": "No reputation record for target 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 in 2 source(s).",
+            "category": "interaction",
+            "severity": "low",
+            "confidence": "low",
+            "source": "heuristic",
+            "subjects": [
+                "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+            ],
+            "mitigation": "Confirm the contract address through the project's official channels.",
+            "falsePositiveNotes": "Most legitimate contracts are not on any list. Only reported when reputation sources are configured; plain transfers to accounts are not reported.",
+            "fingerprint": "TXS-INTERACT-003:0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+        },
+        {
+            "ruleId": "TXS-INTERACT-006",
+            "title": "Execution reaches contracts not named in the calldata",
+            "description": "3 contract(s) called during execution are not referenced in calldata: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC, 0x5FbDB2315678afecb367f032d93F642f64180aa3, 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+            "category": "interaction",
+            "severity": "info",
+            "confidence": "low",
+            "source": "heuristic",
+            "evidence": [
+                {
+                    "type": "simulation_trace",
+                    "detail": "calls observed in simulated trace",
+                    "source": "fact",
+                    "data": {
+                        "count": "3"
+                    }
+                }
+            ],
+            "subjects": [
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+            ],
+            "mitigation": "Review the listed contracts in the trace; they are where your transaction's effects actually happen.",
+            "falsePositiveNotes": "Routers routinely call pools and pairs that are derived on-chain rather than passed in calldata. Informational only.",
+            "fingerprint": "TXS-INTERACT-006"
+        }
+    ],
+    "approvals": [],
+    "simulation": {
+        "backend": "anvil",
+        "status": "success",
+        "completeness": "full",
+        "notes": [
+            "Executed in a new block on top of block 7; on-chain state may change before inclusion.",
+            "Simulated with zero gas price, so native balance changes exclude transaction fees."
+        ],
+        "chainId": 31337,
+        "blockNumber": 7,
+        "blockHash": "0xc18c99f4e60d0db363887722ad0eb7567d9e9eb01a63ca850378a21963303b3b",
+        "gasUsed": 114333,
+        "gasEstimate": 126150,
+        "logs": [
+            {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                    "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                    "0x0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc"
+                ],
+                "data": "0x00000000000000000000000000000000000000000000003635c9adc5dea00000",
+                "index": 0
+            },
+            {
+                "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                "topics": [
+                    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                    "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                    "0x0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+                    "0x0000000000000000000000000000000000000000000000000000000000000001"
+                ],
+                "data": "0x",
+                "index": 1
+            }
+        ],
+        "trace": {
+            "type": "CALL",
+            "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+            "value": "10000000000000000",
+            "gas": 29978936,
+            "gasUsed": 114333,
+            "input": "0x4e71d92d",
+            "output": "0x",
+            "calls": [
+                {
+                    "type": "STATICCALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "gas": 29503366,
+                    "gasUsed": 2538,
+                    "input": "0x70a0823100000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                    "output": "0x00000000000000000000000000000000000000000000003635c9adc5dea00000"
+                },
+                {
+                    "type": "STATICCALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "gas": 29500484,
+                    "gasUsed": 2778,
+                    "input": "0xdd62ed3e00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8000000000000000000000000cf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+                    "output": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                },
+                {
+                    "type": "CALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "gas": 29497294,
+                    "gasUsed": 28447,
+                    "input": "0x23b872dd00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc00000000000000000000000000000000000000000000003635c9adc5dea00000",
+                    "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+                },
+                {
+                    "type": "STATICCALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                    "gas": 29464048,
+                    "gasUsed": 2779,
+                    "input": "0xe985e9c500000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8000000000000000000000000cf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+                    "output": "0x0000000000000000000000000000000000000000000000000000000000000001"
+                },
+                {
+                    "type": "CALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                    "gas": 29456230,
+                    "gasUsed": 38072,
+                    "input": "0x23b872dd00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc0000000000000000000000000000000000000000000000000000000000000001",
+                    "output": "0x"
+                },
+                {
+                    "type": "CALL",
+                    "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "10000000000000000",
+                    "gas": 29409372,
+                    "gasUsed": 0,
+                    "input": "0x",
+                    "output": "0x"
+                }
+            ]
+        },
+        "balanceChanges": [
+            {
+                "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "asset": {
+                    "kind": "native"
+                },
+                "before": "10000000000000000000000",
+                "after": "9999990000000000000000",
+                "delta": "-10000000000000000"
+            },
+            {
+                "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "asset": {
+                    "kind": "erc20",
+                    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "symbol": "TUSD",
+                    "decimals": 18
+                },
+                "before": "1000000000000000000000",
+                "after": "0",
+                "delta": "-1000000000000000000000"
+            },
+            {
+                "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "asset": {
+                    "kind": "erc721",
+                    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+                },
+                "before": "1",
+                "after": "0",
+                "delta": "-1"
+            }
+        ],
+        "assetTransfers": [
+            {
+                "asset": {
+                    "kind": "native"
+                },
+                "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                "amount": "10000000000000000"
+            },
+            {
+                "asset": {
+                    "kind": "native"
+                },
+                "from": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+                "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "amount": "10000000000000000"
+            },
+            {
+                "asset": {
+                    "kind": "erc20",
+                    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "symbol": "TUSD",
+                    "decimals": 18
+                },
+                "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "amount": "1000000000000000000000",
+                "logIndex": 0
+            },
+            {
+                "asset": {
+                    "kind": "erc721",
+                    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                    "tokenId": "1"
+                },
+                "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "amount": "1",
+                "logIndex": 1
+            }
+        ],
+        "durationMs": 108
+    },
+    "balanceChanges": [
+        {
+            "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "asset": {
+                "kind": "native"
+            },
+            "before": "10000000000000000000000",
+            "after": "9999990000000000000000",
+            "delta": "-10000000000000000"
+        },
+        {
+            "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "asset": {
+                "kind": "erc20",
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "symbol": "TUSD",
+                "decimals": 18
+            },
+            "before": "1000000000000000000000",
+            "after": "0",
+            "delta": "-1000000000000000000000"
+        },
+        {
+            "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "asset": {
+                "kind": "erc721",
+                "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+            },
+            "before": "1",
+            "after": "0",
+            "delta": "-1"
+        }
+    ],
+    "recommendations": [
+        "Do not sign unless you expect this token to leave your wallet. Revoke existing approvals for it if this came from an untrusted site.",
+        "Review every outgoing asset in the simulation before signing.",
+        "Make sure you intend to give these assets away. Legitimate swaps, mints, and claims return something.",
+        "Check why this call needs native currency. Token approvals and transfers never require it.",
+        "Confirm you intend to move your full balance of this token.",
+        "Confirm the contract address through the project's official channels.",
+        "Verify the destination address, amounts, and network in your wallet's confirmation screen before signing."
+    ],
+    "enabledChecks": [
+        "TXS-APPROVAL-001",
+        "TXS-APPROVAL-002",
+        "TXS-APPROVAL-003",
+        "TXS-APPROVAL-004",
+        "TXS-APPROVAL-005",
+        "TXS-APPROVAL-006",
+        "TXS-APPROVAL-007",
+        "TXS-INTERACT-001",
+        "TXS-INTERACT-002",
+        "TXS-INTERACT-003",
+        "TXS-INTERACT-004",
+        "TXS-INTERACT-005",
+        "TXS-INTERACT-006",
+        "TXS-VALUE-001",
+        "TXS-VALUE-002",
+        "TXS-VALUE-003",
+        "TXS-VALUE-004",
+        "TXS-VALUE-005",
+        "TXS-PATTERN-001",
+        "TXS-PATTERN-002",
+        "TXS-PATTERN-003",
+        "TXS-PATTERN-004",
+        "TXS-PATTERN-005",
+        "TXS-PATTERN-006",
+        "TXS-PATTERN-007",
+        "TXS-PATTERN-008",
+        "TXS-PATTERN-009",
+        "TXS-PATTERN-010",
+        "TXS-SIM-001",
+        "reputation:local",
+        "reputation:list:example-blocklist",
+        "contract-facts",
+        "simulation:anvil"
+    ],
+    "disclaimer": "TxShield reports what its enabled checks observed. Simulation and static analysis cannot guarantee that a transaction is safe; on-chain state can change before inclusion and malicious contracts can behave differently outside simulation."
+}

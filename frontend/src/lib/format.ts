@@ -83,3 +83,55 @@ export function visible(s: string | undefined | null, max = 500): string {
   if (out.length > max) out = out.slice(0, max) + "…";
   return out;
 }
+
+/** A simulated asset as returned by the API (symbol and decimals are self-reported by the token). */
+export interface AssetLike {
+  kind: string;
+  address?: string;
+  tokenId?: string;
+  symbol?: string;
+  decimals?: number;
+}
+
+/**
+ * Display name and amount for an asset. Native amounts use the chain's
+ * 18-decimal native unit. Token symbol and decimals come from the token
+ * contract and are flagged `unverified`; without decimals, amounts stay raw
+ * base units rather than guessing.
+ */
+export function assetDisplay(asset: AssetLike, amount: string, chainId: number): { name: string; amount: string; unverified: boolean; raw: boolean } {
+  if (asset.kind === "native") return { name: nativeSymbol(chainId), amount: formatUnits(amount), unverified: false, raw: false };
+  const symbol = visible(asset.symbol, 16);
+  const fallback = asset.kind === "erc721" ? "NFT" : asset.kind === "erc1155" ? "ERC-1155" : "Token";
+  const name = (symbol || fallback) + (asset.tokenId ? ` #${asset.tokenId}` : "");
+  if (asset.kind === "erc20" && asset.decimals !== undefined && asset.decimals <= 77) {
+    return { name, amount: formatUnits(amount, asset.decimals), unverified: true, raw: false };
+  }
+  return { name, amount: groupDigits(amount), unverified: Boolean(symbol), raw: asset.kind === "erc20" };
+}
+
+/** Names of standard selectors, for labelling call-trace frames (selectors are exact). */
+export const KNOWN_SELECTORS: Record<string, string> = {
+  "0x70a08231": "balanceOf",
+  "0xdd62ed3e": "allowance",
+  "0xa9059cbb": "transfer",
+  "0x23b872dd": "transferFrom",
+  "0x095ea7b3": "approve",
+  "0xe985e9c5": "isApprovedForAll",
+  "0xa22cb465": "setApprovalForAll",
+  "0x42842e0e": "safeTransferFrom",
+  "0xb88d4fde": "safeTransferFrom",
+  "0x2eb2c2d6": "safeBatchTransferFrom",
+  "0x6352211e": "ownerOf",
+  "0x081812fc": "getApproved",
+  "0x313ce567": "decimals",
+  "0x95d89b41": "symbol",
+  "0x06fdde03": "name",
+  "0x18160ddd": "totalSupply",
+  "0xd505accf": "permit",
+  "0xac9650d8": "multicall",
+  "0x82ad56cb": "aggregate3",
+  "0xd0e30db0": "deposit",
+  "0x2e1a7d4d": "withdraw",
+  "0x01ffc9a7": "supportsInterface",
+};

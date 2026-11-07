@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { describeAmount, formatUnits, groupDigits, shortHex, visible } from "@/lib/format";
+import { searchTarget } from "@/lib/search";
 
 describe("formatUnits (exact bigint math)", () => {
   it.each([
@@ -42,5 +43,17 @@ describe("visible (untrusted text)", () => {
   it("truncates and tolerates empty input", () => {
     expect(visible("x".repeat(10), 4)).toBe("xxxx…");
     expect(visible(undefined)).toBe("");
+  });
+});
+
+
+describe("searchTarget", () => {
+  it("routes each input shape and rejects the rest", () => {
+    expect(searchTarget(" 14C8FB93-BA82-4835-B732-00717E2E583F ", 1)).toBe("/analyses/14c8fb93-ba82-4835-b732-00717e2e583f");
+    expect(searchTarget("0x" + "ab".repeat(32), 31337)).toBe(`/scan?hash=0x${"ab".repeat(32)}&chainId=31337`);
+    expect(searchTarget("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 1)).toBe("/address?address=0x70997970C51812dc3A010C7d01b50e0d17dc79C8&chainId=1");
+    for (const bad of ["", "hello", "0x1234", "javascript:alert(1)", "/analyses/../x", "0x" + "zz".repeat(20)]) {
+      expect(searchTarget(bad, 1)).toBeNull();
+    }
   });
 });

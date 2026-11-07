@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // Registry maps chain IDs to operator-configured RPC endpoints. Clients are

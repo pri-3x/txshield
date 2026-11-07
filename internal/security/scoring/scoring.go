@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
 )
 
 // Config holds the scoring weights. All fields are required after

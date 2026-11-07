@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/txshield/txshield/pkg/interfaces"
-	"github.com/txshield/txshield/pkg/models"
-	"github.com/txshield/txshield/pkg/txerrors"
+	"github.com/pri-3x/txshield/pkg/interfaces"
+	"github.com/pri-3x/txshield/pkg/models"
+	"github.com/pri-3x/txshield/pkg/txerrors"
 )
 
 // The OpenAPI document is generated: component schemas are reflected from
