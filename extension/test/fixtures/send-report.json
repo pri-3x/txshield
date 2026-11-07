@@ -1,0 +1,128 @@
+{
+    "id": "e5d2c396-8bf3-4bc4-83fc-42813b97fc3d",
+    "requestId": "1a2554df6f9e078d342ad4a6",
+    "engineVersion": "0c8f4a5-dirty",
+    "analyzedAt": "2026-11-07T10:21:14.056786Z",
+    "transaction": {
+        "chainId": 31337,
+        "chainName": "Anvil (local)",
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "value": "10000000000000000",
+        "kind": "native_transfer",
+        "description": "Transfer 10000000000000000 wei to 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "block": "7"
+    },
+    "decoded": {
+        "kind": "native_transfer",
+        "callType": "call",
+        "target": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "value": "10000000000000000",
+        "source": "none"
+    },
+    "risk": {
+        "score": 0,
+        "category": "low",
+        "confidence": "high",
+        "contributions": []
+    },
+    "verdict": "No significant risks detected by enabled checks.",
+    "findings": [],
+    "approvals": [],
+    "simulation": {
+        "backend": "anvil",
+        "status": "success",
+        "completeness": "full",
+        "notes": [
+            "Executed in a new block on top of block 7; on-chain state may change before inclusion.",
+            "Simulated with zero gas price, so native balance changes exclude transaction fees."
+        ],
+        "chainId": 31337,
+        "blockNumber": 7,
+        "blockHash": "0xc18c99f4e60d0db363887722ad0eb7567d9e9eb01a63ca850378a21963303b3b",
+        "gasUsed": 21000,
+        "gasEstimate": 21000,
+        "trace": {
+            "type": "CALL",
+            "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "to": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+            "value": "10000000000000000",
+            "gas": 29979000,
+            "gasUsed": 21000,
+            "input": "0x",
+            "output": "0x"
+        },
+        "balanceChanges": [
+            {
+                "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "asset": {
+                    "kind": "native"
+                },
+                "before": "10000000000000000000000",
+                "after": "9999990000000000000000",
+                "delta": "-10000000000000000"
+            }
+        ],
+        "assetTransfers": [
+            {
+                "asset": {
+                    "kind": "native"
+                },
+                "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "to": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                "amount": "10000000000000000"
+            }
+        ],
+        "durationMs": 42
+    },
+    "balanceChanges": [
+        {
+            "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "asset": {
+                "kind": "native"
+            },
+            "before": "10000000000000000000000",
+            "after": "9999990000000000000000",
+            "delta": "-10000000000000000"
+        }
+    ],
+    "recommendations": [
+        "Verify the destination address, amounts, and network in your wallet's confirmation screen before signing."
+    ],
+    "enabledChecks": [
+        "TXS-APPROVAL-001",
+        "TXS-APPROVAL-002",
+        "TXS-APPROVAL-003",
+        "TXS-APPROVAL-004",
+        "TXS-APPROVAL-005",
+        "TXS-APPROVAL-006",
+        "TXS-APPROVAL-007",
+        "TXS-INTERACT-001",
+        "TXS-INTERACT-002",
+        "TXS-INTERACT-003",
+        "TXS-INTERACT-004",
+        "TXS-INTERACT-005",
+        "TXS-INTERACT-006",
+        "TXS-VALUE-001",
+        "TXS-VALUE-002",
+        "TXS-VALUE-003",
+        "TXS-VALUE-004",
+        "TXS-VALUE-005",
+        "TXS-PATTERN-001",
+        "TXS-PATTERN-002",
+        "TXS-PATTERN-003",
+        "TXS-PATTERN-004",
+        "TXS-PATTERN-005",
+        "TXS-PATTERN-006",
+        "TXS-PATTERN-007",
+        "TXS-PATTERN-008",
+        "TXS-PATTERN-009",
+        "TXS-PATTERN-010",
+        "TXS-SIM-001",
+        "reputation:local",
+        "reputation:list:example-blocklist",
+        "contract-facts",
+        "simulation:anvil"
+    ],
+    "disclaimer": "TxShield reports what its enabled checks observed. Simulation and static analysis cannot guarantee that a transaction is safe; on-chain state can change before inclusion and malicious contracts can behave differently outside simulation."
+}

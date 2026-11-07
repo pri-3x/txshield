@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TxShield settings</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main>
+  <h1>TxShield settings</h1>
+  <p class="lead">TxShield checks each transaction a website asks your wallet to send, before your wallet opens. It never signs, sends, or sees your keys.</p>
+  <form id="form" novalidate>
+    <label for="apiUrl">TxShield API URL</label>
+    <input id="apiUrl" name="apiUrl" type="url" required spellcheck="false" autocomplete="off" aria-describedby="apiUrl-hint">
+    <p id="apiUrl-hint" class="hint">Transactions you are asked to sign are sent here for analysis. Use a server you trust, such as your own.</p>
+
+    <label for="apiKey">API key (if the server requires one)</label>
+    <input id="apiKey" name="apiKey" type="password" spellcheck="false" autocomplete="off" aria-describedby="apiKey-hint">
+    <p id="apiKey-hint" class="hint">Stored on this device only.</p>
+
+    <label for="dashboardUrl">Dashboard URL (for "Full report" links)</label>
+    <input id="dashboardUrl" name="dashboardUrl" type="url" spellcheck="false" autocomplete="off">
+
+    <label for="threshold">Show the full warning at</label>
+    <select id="threshold" name="threshold">
+      <option value="20">Moderate risk and above (score 20+)</option>
+      <option value="40">Elevated risk and above (40+)</option>
+      <option value="60">High risk and above (60+)</option>
+    </select>
+    <p class="hint">Below this, a short notice appears and the wallet opens as usual. Transactions that fail in simulation always show the warning.</p>
+
+    <div class="actions">
+      <button type="submit">Save</button>
+      <button type="button" id="test" class="secondary">Test connection</button>
+    </div>
+    <p id="status" role="status" class="status"></p>
+  </form>
+</main>
+<script src="lib.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TxShield harness</title>
+<link rel="stylesheet" href="page.css">
+<!-- Test harness: runs the extension's scripts in this page (no browser
+     extension needed). Order matches the real extension: interceptor before
+     any page script, then the content script, then the dApp. -->
+<script src="../src/lib.js"></script>
+<script src="harness-shim.js"></script>
+<script src="../src/inpage.js"></script>
+<script src="../src/content.js"></script>
+</head>
+<body>
+<main>
+  <div class="banner"><strong>Harness mode:</strong> the TxShield extension scripts run inside this page and call the API at <code id="api"></code> directly.</div>
+  <h1>Claim your TUSD airdrop</h1>
+  <section class="card"><h2>1. Claim airdrop</h2><p>Drainer <code>claim()</code> with a 0.01 ETH fee.</p><button id="claim">Claim airdrop</button></section>
+  <section class="card"><h2>2. Send 0.01 ETH to a friend</h2><p>A plain ETH transfer.</p><button id="send" class="alt">Send 0.01 ETH</button></section>
+  <section class="card"><h2>3. "Enable trading"</h2><p>Unlimited TUSD approval to <code>0x…dEaD</code>.</p><button id="approve" class="warn">Enable trading</button></section>
+  <h2>Log</h2>
+  <pre id="log" aria-live="polite"></pre>
+</main>
+<script src="demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #fdf6e3; color: #222; }
+main { max-width: 640px; margin: 0 auto; padding: 32px 20px; }
+h1 { font-size: 28px; margin: 0 0 4px; }
+.banner { background: #fff3c4; border: 1px solid #e6c84d; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 20px; }
+.card { background: #fff; border: 1px solid #e5dcc3; border-radius: 14px; padding: 18px; margin: 14px 0; }
+.card h2 { margin: 0 0 6px; font-size: 17px; }
+.card p { margin: 0 0 12px; color: #555; font-size: 14px; }
+button { height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: #7b2ff7; color: #fff; font: 600 15px inherit; cursor: pointer; }
+button.alt { background: #1f6feb; }
+button.warn { background: #b42318; }
+pre { background: #1d1f23; color: #d6deeb; border-radius: 10px; padding: 12px; font-size: 12px; white-space: pre-wrap; word-break: break-all; min-height: 4em; }
+code { font-size: 12px; }
