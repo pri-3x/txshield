@@ -21,7 +21,9 @@ Not yet published to any extension store.
 2. Open `chrome://extensions`, turn on **Developer mode**, click **Load
    unpacked**, and choose this `extension/` folder.
 3. The settings page opens. Set the **API URL** (default
-   `http://127.0.0.1:18080`), an **API key** if the server needs one, and the
+   `http://127.0.0.1:18080`). With `TXSHIELD_INSTALL_TOKENS=true` on the
+   server, no key is needed: the extension fetches an anonymous install token
+   on first use. Otherwise set an **API key** if the server needs one, and the
    **Dashboard URL** for "Full report" links. Click **Test connection**, then
    **Save**. Saving a non-local API URL asks Chrome for permission to contact
    that host.
@@ -57,7 +59,9 @@ automated browser checks run. The API must allow the page's origin:
 ## Privacy
 
 Every transaction a site asks you to send (sender, recipient, value,
-calldata) goes to the API URL you configure, and nowhere else. Run your own
+calldata) goes to the API URL you configure, and nowhere else. Requests are
+sent with `persist: false`, and a server with install tokens enabled never
+stores them regardless. Run your own
 server, or use one you trust. The API key is stored on this device only
 (`chrome.storage.local`). The extension never sees or handles private keys
 and cannot sign or send anything itself.

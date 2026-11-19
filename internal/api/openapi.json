@@ -1091,6 +1091,28 @@
         ],
         "type": "object"
       },
+      "InstallResponse": {
+        "properties": {
+          "note": {
+            "type": "string"
+          },
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "note",
+          "scope",
+          "token"
+        ],
+        "type": "object"
+      },
       "Log": {
         "properties": {
           "address": {
@@ -1631,7 +1653,7 @@
     },
     "securitySchemes": {
       "bearerAuth": {
-        "description": "Required only when the server sets TXSHIELD_API_KEYS.",
+        "description": "An API key (required only when the server sets TXSHIELD_API_KEYS) or an install token from POST /api/v1/install.",
         "scheme": "bearer",
         "type": "http"
       }
@@ -2328,6 +2350,49 @@
           }
         },
         "summary": "Engine configuration",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/v1/install": {
+      "post": {
+        "description": "Issues a token for a browser-extension install. Enabled only when the server sets TXSHIELD_INSTALL_TOKENS. The token is not stored and identifies no person or device. Requests made with it may only analyze or decode, are rate limited per token, and are never persisted. Issuance is rate limited per IP.",
+        "operationId": "install",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallResponse"
+                }
+              }
+            },
+            "description": "Token issued"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Install tokens are not enabled on this server"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Rate limited (see `Retry-After`)"
+          }
+        },
+        "security": [],
+        "summary": "Get an anonymous install token",
         "tags": [
           "meta"
         ]

@@ -1,6 +1,39 @@
 # Development Status
 
-Last updated: 2026-11-07. Current phase: **8 (Hardening & release), complete** except the items under *Not verified*. All eight phases are implemented.
+Last updated: 2026-11-19. Engine phases 1-8 are complete (open items under *Not verified*). Product roadmap: **Phase 1 (private, fast API for the browser extension), done locally on Sepolia.**
+
+## Product Phase 1: private, fast API for the extension (local, Sepolia)
+
+| Area | Files | Tested |
+|---|---|---|
+| `rpc-simulate` backend (`eth_simulateV1` + traceTransfers; token balance diffs in a second round trip; `rpc-trace` fallback) | `internal/simulator/simulatev1.go` | unit (fake node: drainer, revert, insufficient funds, fallback, outage); live Sepolia |
+| Anonymous install tokens: stateless HMAC, scope analyze/decode/info, per-token and per-IP issuance limits, never persisted | `internal/api/install.go`, `internal/config` | unit incl. forgery, scope, keys configured, restart with shared secret; mutation-checked (no-persist guard) |
+| Parallel analysis: simulation overlaps lookups; token metadata parallel + cached; proxy slots parallel; standards cached by code hash + implementation | `internal/analyzer/{analyzer,gather}.go`, `internal/evm/inspector.go` | unit (overlap timing, cache reuse, proxy upgrade re-probe) |
+| Detection fix: simulated asset counterparties, tokens, and spenders are reputation-checked | `internal/security/core/core.go` | unit; mutation-checked |
+| Robustness: panics in analyzer goroutines degrade the report instead of crashing the server (a nil-cache crash was found during the live test and fixed) | `internal/analyzer/analyzer.go` | unit |
+| Latency: `Server-Timing` header, `txshield_analysis_stage_duration_seconds{stage}` | `internal/api/timing.go`, `internal/metrics` | unit |
+| Extension: install token flow, `persist:false`, 8 s timeout | `extension/src/{lib,background}.js` | 23 unit tests |
+
+Live Sepolia check (public RPC `ethereum-sepolia-rpc.publicnode.com`, from a
+laptop in India, 2026-11-19), through install token + `/analyze`:
+
+| Case | Score | Rules |
+|---|---|---|
+| Plain ETH send | 0 low | none |
+| Wrap ETH (WETH deposit) | 4 low | INTERACT-003 |
+| Unlimited WETH approval to an EOA | 52 elevated | APPROVAL-001/004/006, INTERACT-003 |
+| WETH withdraw more than held | 11 low | SIM-001 (+INTERACT-003) |
+| Send more ETH than owned | 8 low | SIM-001 ("insufficient funds") |
+| ETH to a blocklisted address | 85 critical | INTERACT-001 |
+
+Latency: 380-840 ms warm, 730-890 ms on a new block (was 2.6-2.8 s), ~1.5 s
+the first time a contract is seen. Install token on `/api/v1/analyses`: 403.
+
+Not done in Phase 1: real threat-intel feeds (only the example blocklist is
+loaded); typed-data signature checks (Phase 2); `golangci-lint` not run locally
+(not installed; CI runs it); the extension was not driven in a real browser
+against Sepolia (unit tests only). Next latency step: cache the latest block
+for about one second (resolving it is now 200-600 ms of every request).
 
 ## Post-release: dashboard redesign (analyst console)
 

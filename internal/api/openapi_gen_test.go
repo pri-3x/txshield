@@ -230,6 +230,12 @@ func buildSpec() obj {
 			"responses": common(obj{"200": ok(reflect.TypeFor[TransactionLookup](), "Transaction ready for analysis"),
 				"404": errResp("Transaction not found"), "422": errResp("Chain not configured"), "503": errResp("RPC unavailable")}),
 		}},
+		"/api/v1/install": obj{"post": obj{"security": []any{},
+			"summary": "Get an anonymous install token", "operationId": "install", "tags": []any{"meta"},
+			"description": "Issues a token for a browser-extension install. Enabled only when the server sets TXSHIELD_INSTALL_TOKENS. The token is not stored and identifies no person or device. Requests made with it may only analyze or decode, are rate limited per token, and are never persisted. Issuance is rate limited per IP.",
+			"responses": obj{"201": ok(reflect.TypeFor[InstallResponse](), "Token issued"),
+				"422": errResp("Install tokens are not enabled on this server"), "429": errResp("Rate limited (see `Retry-After`)")},
+		}},
 		"/api/v1/stats": obj{"get": obj{
 			"summary": "Aggregate statistics", "operationId": "stats", "tags": []any{"history"},
 			"parameters": []any{q("since", "RFC 3339 lower bound", false, obj{"type": "string", "format": "date-time"})},
@@ -249,7 +255,7 @@ func buildSpec() obj {
 		"security": []any{obj{"bearerAuth": []any{}}, obj{}},
 		"paths":    paths,
 		"components": obj{"schemas": g.defs, "securitySchemes": obj{"bearerAuth": obj{
-			"type": "http", "scheme": "bearer", "description": "Required only when the server sets TXSHIELD_API_KEYS.",
+			"type": "http", "scheme": "bearer", "description": "An API key (required only when the server sets TXSHIELD_API_KEYS) or an install token from POST /api/v1/install.",
 		}}},
 	}
 }

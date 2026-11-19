@@ -29,7 +29,7 @@ func (s *Server) parseTx(req models.TransactionRequest) (*models.Transaction, er
 }
 
 // runAnalysis performs an analysis for the analyze and approvals endpoints.
-func (s *Server) runAnalysis(r *http.Request, req AnalyzeRequest, simulateDefault bool) (*models.RiskReport, *models.Transaction, chainSet, error) {
+func (s *Server) runAnalysis(w http.ResponseWriter, r *http.Request, req AnalyzeRequest, simulateDefault bool) (*models.RiskReport, *models.Transaction, chainSet, error) {
 	e := s.engine
 	tx, err := s.parseTx(req.TxRequest)
 	if err != nil {
@@ -44,8 +44,10 @@ func (s *Server) runAnalysis(r *http.Request, req AnalyzeRequest, simulateDefaul
 		simulate = *req.Simulate
 	}
 	start := time.Now()
+	var tm analyzer.Timings
 	report, err := e.analyzerFor(cs).Analyze(r.Context(), analyzer.Request{
 		Tx: tx, Decode: interfaces.DecodeOptions{ABIJSON: req.ABI}, Simulate: simulate, RequestID: RequestIDFrom(r.Context()),
+		Timings: &tm,
 	})
 	if err != nil {
 		return nil, nil, cs, err
@@ -54,6 +56,7 @@ func (s *Server) runAnalysis(r *http.Request, req AnalyzeRequest, simulateDefaul
 		report.Warnings = append([]string{cs.warning}, report.Warnings...)
 	}
 	s.metrics.AnalysisDuration.Observe(time.Since(start).Seconds())
+	observeStages(s.metrics, w, &tm)
 	s.metrics.Analyses.WithLabelValues(string(report.Risk.Category)).Inc()
 	if sim := report.Simulation; sim != nil && sim.Status != models.SimNotRun {
 		s.metrics.Simulations.WithLabelValues(sim.Backend, string(sim.Status), string(sim.Completeness)).Inc()
@@ -68,7 +71,8 @@ func (s *Server) runAnalysis(r *http.Request, req AnalyzeRequest, simulateDefaul
 // contract facts and simulation come from a node the caller controls, and
 // history is shared (dashboard, /stats, address history).
 func (s *Server) persist(ctx context.Context, report *models.RiskReport, tx *models.Transaction, want *bool, cs chainSet) {
-	if s.engine.Store == nil || (want != nil && !*want) {
+	if s.engine.Store == nil || (want != nil && !*want) || isInstallRequest(ctx) {
+		// Extension traffic (install tokens) is analyzed in memory only.
 		return
 	}
 	if cs.userRPC {
@@ -95,7 +99,7 @@ func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, err)
 		return
 	}
-	report, tx, cs, err := s.runAnalysis(r, req, true)
+	report, tx, cs, err := s.runAnalysis(w, r, req, true)
 	if err != nil {
 		writeError(w, r, err)
 		return
@@ -182,7 +186,7 @@ func (s *Server) handleApprovals(w http.ResponseWriter, r *http.Request) {
 		writeError(w, r, err)
 		return
 	}
-	report, tx, cs, err := s.runAnalysis(r, req, false)
+	report, tx, cs, err := s.runAnalysis(w, r, req, false)
 	if err != nil {
 		writeError(w, r, err)
 		return

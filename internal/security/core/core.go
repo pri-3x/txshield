@@ -150,8 +150,11 @@ func (a AddressRoles) Roles(addr common.Address) string {
 }
 
 // CollectAddresses gathers the sender, every call target, every address
-// parameter (at any nesting level), approval spenders/tokens, and, when a
-// trace is available, every traced call target.
+// parameter (at any nesting level), approval spenders/tokens, and from the
+// simulation: every traced call target, every party that sends or receives
+// assets, every token moved, and every spender granted an allowance. Asset
+// recipients matter even when the calldata never names them: a drainer
+// contract forwards funds to a collection wallet it holds in storage.
 func CollectAddresses(tx *models.Transaction, root *models.DecodedCall, approvals []models.ApprovalGrant, sim *models.SimulationResult) AddressRoles {
 	roles := AddressRoles{}
 	roles.add(tx.From, RoleSender)
@@ -182,6 +185,26 @@ func CollectAddresses(tx *models.Transaction, root *models.DecodedCall, approval
 				roles.add(common.HexToAddress(fr.To), RoleTraced)
 			}
 		})
+	}
+	if sim != nil {
+		for _, t := range sim.AssetTransfers {
+			for _, party := range []string{t.From, t.To} {
+				if common.IsHexAddress(party) {
+					roles.add(common.HexToAddress(party), RoleRecipient)
+				}
+			}
+			if t.Asset.Kind != models.AssetNative && common.IsHexAddress(t.Asset.Address) {
+				roles.add(common.HexToAddress(t.Asset.Address), RoleToken)
+			}
+		}
+		for _, c := range sim.ApprovalChanges {
+			if common.IsHexAddress(c.Spender) {
+				roles.add(common.HexToAddress(c.Spender), RoleSpender)
+			}
+			if common.IsHexAddress(c.Asset.Address) {
+				roles.add(common.HexToAddress(c.Asset.Address), RoleToken)
+			}
+		}
 	}
 	return roles
 }

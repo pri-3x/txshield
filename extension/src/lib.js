@@ -16,7 +16,9 @@
     apiKey: "",
     dashboardUrl: "http://localhost:3000",
     threshold: 20, // warn at "moderate" (20+) and above
-    timeoutMs: 25000,
+    // The wallet is waiting: a check that takes longer than this is reported
+    // as "could not be checked" and the user decides.
+    timeoutMs: 8000,
   });
 
   const CHAIN_SYMBOL = { 1: "ETH", 10: "ETH", 8453: "ETH", 42161: "ETH", 17000: "ETH", 11155111: "ETH", 31337: "ETH", 56: "BNB", 137: "POL" };
@@ -57,7 +59,9 @@
     const chainId = parseChainId(chainIdRaw ?? tx.chainId);
     if (!chainId) return { ok: false, error: "unknown chain" };
     if (typeof tx.from !== "string" || !ADDRESS.test(tx.from)) return { ok: false, error: "missing or invalid sender" };
-    const req = { chainId, from: tx.from, simulate: true };
+    // persist:false: extension checks are never kept in server history (a
+    // server with install tokens enforces this regardless).
+    const req = { chainId, from: tx.from, simulate: true, persist: false };
     if (tx.to != null && tx.to !== "") {
       if (typeof tx.to !== "string" || !ADDRESS.test(tx.to)) return { ok: false, error: "invalid recipient" };
       req.to = tx.to;
@@ -78,21 +82,57 @@
     return { ok: true, request: req };
   }
 
-  /** Calls POST /api/v1/analyze. Never throws. */
-  async function analyze(settings, request, fetchImpl) {
+  const INSTALL_PREFIX = "txsi_";
+
+  async function readBody(res) {
+    try {
+      return await res.json();
+    } catch {
+      return null; // non-JSON error page
+    }
+  }
+
+  /**
+   * Returns the bearer credential: the user's API key if set, otherwise an
+   * anonymous install token (fetched once from POST /api/v1/install and kept
+   * on this device). Returns "" when the server has install tokens disabled.
+   */
+  async function credential(base, settings, tokens, doFetch, signal) {
+    if (settings.apiKey) return settings.apiKey;
+    if (!tokens) return "";
+    const saved = await tokens.get();
+    if (saved && saved.startsWith(INSTALL_PREFIX)) return saved;
+    const res = await doFetch(`${base}/api/v1/install`, { method: "POST", signal, credentials: "omit" });
+    if (!res.ok) return ""; // disabled (422) or rate limited: try without
+    const body = await readBody(res);
+    const tok = body && typeof body.token === "string" && body.token.startsWith(INSTALL_PREFIX) ? body.token : "";
+    if (tok) await tokens.set(tok);
+    return tok;
+  }
+
+  /**
+   * Calls POST /api/v1/analyze. Never throws. tokens ({get, set}, optional)
+   * stores the anonymous install token used when no API key is configured.
+   */
+  async function analyze(settings, request, fetchImpl, tokens) {
     const base = normalizeApiUrl(settings.apiUrl);
     if (!base) return { ok: false, error: "The TxShield API URL in the extension settings is not a valid http(s) URL." };
+    const doFetch = fetchImpl || fetch;
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), settings.timeoutMs || DEFAULTS.timeoutMs);
+    const started = Date.now();
     try {
-      const headers = { "Content-Type": "application/json" };
-      if (settings.apiKey) headers.Authorization = `Bearer ${settings.apiKey}`;
-      const res = await (fetchImpl || fetch)(`${base}/api/v1/analyze`, { method: "POST", headers, body: JSON.stringify(request), signal: ctrl.signal, credentials: "omit" });
-      let body = null;
-      try {
-        body = await res.json();
-      } catch {
-        // non-JSON error page
+      let res;
+      let body;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const bearer = await credential(base, settings, tokens, doFetch, ctrl.signal);
+        const headers = { "Content-Type": "application/json" };
+        if (bearer) headers.Authorization = `Bearer ${bearer}`;
+        res = await doFetch(`${base}/api/v1/analyze`, { method: "POST", headers, body: JSON.stringify(request), signal: ctrl.signal, credentials: "omit" });
+        body = await readBody(res);
+        const expired = res.status === 401 && bearer.startsWith(INSTALL_PREFIX) && body && body.error && body.error.code === "invalid_install_token";
+        if (!expired || !tokens) break;
+        await tokens.set(""); // server restarted with a new secret: get a fresh token once
       }
       if (!res.ok) {
         const msg = body && body.error && typeof body.error.message === "string" ? body.error.message : `HTTP ${res.status}`;
@@ -100,7 +140,7 @@
         return { ok: false, error: `TxShield API error: ${msg}${fields ? ` (${fields})` : ""}`, status: res.status };
       }
       if (!body || !body.risk || typeof body.risk.score !== "number") return { ok: false, error: "TxShield API returned an unexpected response." };
-      return { ok: true, report: body };
+      return { ok: true, report: body, elapsedMs: Date.now() - started };
     } catch (e) {
       const aborted = e && e.name === "AbortError";
       return { ok: false, error: aborted ? "The TxShield API did not answer in time." : "Could not reach the TxShield API. Check the API URL in the extension settings." };

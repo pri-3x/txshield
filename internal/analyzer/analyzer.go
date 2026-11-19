@@ -9,14 +9,11 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/big"
-	"sort"
 	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/pri-3x/txshield/internal/evm"
 	"github.com/pri-3x/txshield/internal/security/approvals"
 	"github.com/pri-3x/txshield/internal/security/core"
 	"github.com/pri-3x/txshield/internal/security/reputation"
@@ -50,7 +47,10 @@ type Deps struct {
 }
 
 // Analyzer runs analyses. It is safe for concurrent use.
-type Analyzer struct{ d Deps }
+type Analyzer struct {
+	d      Deps
+	tokens *tokenCache
+}
 
 // New validates deps and returns an Analyzer.
 func New(d Deps) (*Analyzer, error) {
@@ -69,7 +69,7 @@ func New(d Deps) (*Analyzer, error) {
 	if d.EngineVersion == "" {
 		d.EngineVersion = "dev"
 	}
-	return &Analyzer{d: d}, nil
+	return &Analyzer{d: d, tokens: newTokenCache(4096)}, nil
 }
 
 // Request is one analysis request.
@@ -81,6 +81,20 @@ type Request struct {
 	// BlockNumber is the resolved block state is read at (0 = unknown,
 	// offline). Resolving tags to numbers is the caller's job (Phase 4).
 	BlockNumber uint64
+	// Timings, when non-nil, receives how long each stage took.
+	Timings *Timings
+}
+
+// Timings records the wall-clock duration of each analysis stage. Context
+// gathering overlaps simulation, so stages do not add up to Total.
+type Timings struct {
+	Decode   time.Duration // calldata decoding (offline)
+	Block    time.Duration // resolving the block to analyze against
+	Simulate time.Duration // simulation backend
+	Context  time.Duration // reputation and contract lookups, summed (the first part overlaps Simulate)
+	Rules    time.Duration // rule evaluation and scoring
+	Tokens   time.Duration // token symbol/decimals lookups (overlaps Context)
+	Total    time.Duration
 }
 
 // Analyze produces a report. It returns an error only for invalid input or
@@ -92,12 +106,20 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 	}
 	tx := req.Tx
 	var warnings []string
+	tm := req.Timings
+	if tm == nil {
+		tm = &Timings{}
+	}
+	began := time.Now()
+	defer func() { tm.Total = time.Since(began) }()
 
 	decoded, err := a.d.Decoder.Decode(ctx, tx, req.Decode)
 	if err != nil {
 		return nil, err
 	}
+	tm.Decode = time.Since(began)
 
+	stage := time.Now()
 	if req.BlockNumber == 0 && a.d.Chains != nil {
 		if r, err := a.d.Chains.Reader(tx.ChainID); err != nil {
 			if txerrors.KindOf(err) == txerrors.KindUnsupported {
@@ -113,53 +135,97 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 			req.BlockNumber = info.Number
 		}
 	}
+	tm.Block = time.Since(stage)
 
-	sim := a.simulate(ctx, req, &warnings)
+	// Simulation and context gathering for the addresses named in calldata
+	// run at the same time; addresses that only appear in the simulation
+	// (traced contracts, asset recipients) are looked up afterwards.
+	var sim *models.SimulationResult
+	var simWarnings []string
+	simDone := make(chan struct{})
+	go func() {
+		defer close(simDone)
+		// A panicking backend must not take the server down (this goroutine
+		// is outside the HTTP handler's recovery); it degrades like an
+		// infrastructure failure.
+		defer func() {
+			if p := recover(); p != nil {
+				sim = &models.SimulationResult{Backend: "none", Status: models.SimError, Completeness: models.CompletenessNone, ChainID: tx.ChainID,
+					IncompleteReasons: []string{"simulation backend failed"}}
+				simWarnings = append(simWarnings, "simulation could not be performed (internal error); this says nothing about whether the transaction would succeed")
+			}
+		}()
+		t := time.Now()
+		sim = a.simulate(ctx, req, &simWarnings)
+		tm.Simulate = time.Since(t)
+	}()
 
 	// First pass of approval extraction (standards unresolved) only to know
 	// which spenders/tokens to look up.
 	prelim := approvals.Extract(tx, decoded, nil)
+	pre := a.limitAddresses(core.CollectAddresses(tx, decoded, prelim, nil))
+	preCh := make(chan gathered, 1)
+	var preDur time.Duration
+	go func() {
+		g := gathered{contracts: map[common.Address]*models.ContractInfo{}, reputation: map[common.Address][]models.ReputationRecord{}, inspectFailures: len(pre)}
+		t := time.Now()
+		defer func() {
+			preDur = time.Since(t)
+			if p := recover(); p != nil {
+				g.repWarnings = []string{"reputation and contract checks failed (internal error)"}
+			}
+			preCh <- g
+		}()
+		g = a.gather(ctx, tx.ChainID, pre, req.BlockNumber)
+	}()
+
+	<-simDone
+	warnings = append(warnings, simWarnings...)
 	roles := core.CollectAddresses(tx, decoded, prelim, sim)
-	addrs := make([]common.Address, 0, len(roles))
-	for addr := range roles {
-		addrs = append(addrs, addr)
+	if len(roles) > a.d.MaxAddresses {
+		warnings = append(warnings, fmt.Sprintf("%d addresses involved; only the first %d were checked for reputation and contract facts", len(roles), a.d.MaxAddresses))
 	}
-	sort.Slice(addrs, func(i, j int) bool { return addrs[i].Hex() < addrs[j].Hex() })
-	if len(addrs) > a.d.MaxAddresses {
-		warnings = append(warnings, fmt.Sprintf("%d addresses involved; only the first %d were checked for reputation and contract facts", len(addrs), a.d.MaxAddresses))
-		addrs = addrs[:a.d.MaxAddresses]
+	all := a.limitAddresses(roles)
+
+	// Token display metadata only reads the simulation result; it is applied
+	// after the rules have run.
+	var meta map[common.Address]tokenMeta
+	metaDone := make(chan struct{})
+	go func() {
+		defer close(metaDone)
+		defer func() {
+			if recover() != nil {
+				meta = nil // display hints only
+			}
+		}()
+		t := time.Now()
+		meta = a.fetchTokenMeta(ctx, tx.ChainID, sim)
+		tm.Tokens = time.Since(t)
+	}()
+
+	g := <-preCh
+	tm.Context = preDur
+	if extra := missing(all, pre); len(extra) > 0 {
+		t := time.Now()
+		g.merge(a.gather(ctx, tx.ChainID, extra, req.BlockNumber))
+		tm.Context += time.Since(t)
 	}
 
 	ac := &interfaces.AnalysisContext{
 		Tx: tx, Decoded: decoded, Simulation: sim, BlockNumber: req.BlockNumber, Now: a.d.Now(),
-		Contracts: map[common.Address]*models.ContractInfo{}, Reputation: map[common.Address][]models.ReputationRecord{},
+		Contracts: g.contracts, Reputation: g.reputation,
 	}
-
-	var wg sync.WaitGroup
-	var repWarnings, inspWarnings []string
 	if a.d.Reputation != nil {
 		ac.ReputationSources = a.d.Reputation.Sources()
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			ac.Reputation, repWarnings = a.d.Reputation.LookupAll(ctx, tx.ChainID, addrs)
-		}()
 	}
-	if a.d.Inspector != nil {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			ac.Contracts, inspWarnings = a.inspect(ctx, tx.ChainID, addrs, req.BlockNumber)
-		}()
-	}
-	wg.Wait()
-	warnings = append(warnings, repWarnings...)
-	warnings = append(warnings, inspWarnings...)
-	ac.ContractsKnown = a.d.Inspector != nil && len(inspWarnings) == 0
+	warnings = append(warnings, g.warnings()...)
+	ac.ContractsKnown = a.d.Inspector != nil && g.inspectFailures == 0
 	if err := ctx.Err(); err != nil {
+		<-metaDone
 		return nil, txerrors.Wrap(err, txerrors.KindTimeout, "analysis_timeout", "analysis exceeded its deadline")
 	}
 
+	stage = time.Now()
 	ac.Approvals = approvals.Extract(tx, decoded, ac.Contracts)
 
 	results := a.d.Rules.Run(ctx, ac)
@@ -174,6 +240,7 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 		findings = append(findings, r.Findings...)
 	}
 	if err := ctx.Err(); err != nil {
+		<-metaDone
 		return nil, txerrors.Wrap(err, txerrors.KindTimeout, "analysis_timeout", "analysis exceeded its deadline")
 	}
 
@@ -188,6 +255,8 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 	if !ac.ContractsKnown && a.d.Inspector == nil {
 		warnings = append(warnings, "contract facts (code presence, proxies, token standards) were not checked: no chain access configured")
 	}
+	tm.Rules = time.Since(stage)
+	<-metaDone
 
 	report := &models.RiskReport{
 		ID:              newID(),
@@ -209,7 +278,7 @@ func (a *Analyzer) Analyze(ctx context.Context, req Request) (*models.RiskReport
 		report.Approvals = []models.ApprovalGrant{}
 	}
 	if sim != nil {
-		a.annotateTokens(ctx, tx.ChainID, sim)
+		applyTokenMeta(sim, meta)
 		report.BalanceChanges = sim.BalanceChanges
 	}
 	report.Verdict = verdict(risk, findings)
@@ -240,7 +309,7 @@ func (a *Analyzer) simulate(ctx context.Context, req Request, warnings *[]string
 	return res
 }
 
-func (a *Analyzer) inspect(ctx context.Context, chainID uint64, addrs []common.Address, block uint64) (map[common.Address]*models.ContractInfo, []string) {
+func (a *Analyzer) inspect(ctx context.Context, chainID uint64, addrs []common.Address, block uint64) (map[common.Address]*models.ContractInfo, int) {
 	out := make(map[common.Address]*models.ContractInfo, len(addrs))
 	var mu sync.Mutex
 	var failures int
@@ -267,10 +336,7 @@ func (a *Analyzer) inspect(ctx context.Context, chainID uint64, addrs []common.A
 		}()
 	}
 	wg.Wait()
-	if failures > 0 {
-		return out, []string{fmt.Sprintf("contract facts unavailable for %d address(es); rules that need them were skipped", failures)}
-	}
-	return out, nil
+	return out, failures
 }
 
 func (a *Analyzer) enabledChecks(rules []models.RuleMetadata, sim *models.SimulationResult) []string {
@@ -303,11 +369,19 @@ func newID() string {
 
 // With returns a copy of the analyzer that uses different chain-dependent
 // components (any may be nil for offline analysis). Decoder, rules, scorer,
-// and reputation sources are shared.
+// and reputation sources are shared. The token metadata cache is shared only
+// when the copy reads the same chains: data from another endpoint (such as a
+// caller-supplied RPC, which the caller controls) must not reach other
+// callers' reports.
 func (a *Analyzer) With(chains interfaces.ChainRegistry, inspector interfaces.ContractInspector, sim interfaces.Simulator) *Analyzer {
 	d := a.d
+	sameChains := d.Chains == chains
 	d.Chains, d.Inspector, d.Simulator = chains, inspector, sim
-	return &Analyzer{d: d}
+	cache := a.tokens
+	if !sameChains || cache == nil {
+		cache = newTokenCache(maxTokenMetadata)
+	}
+	return &Analyzer{d: d, tokens: cache}
 }
 
 // Scorer returns the risk scorer (used to score finding subsets).
@@ -322,83 +396,4 @@ func (a *Analyzer) Rules() []models.RuleMetadata { return a.d.Rules.Rules() }
 // Decode exposes the analyzer's decoder (offline, no chain access).
 func (a *Analyzer) Decode(ctx context.Context, tx *models.Transaction, opts interfaces.DecodeOptions) (*models.DecodedCall, error) {
 	return a.d.Decoder.Decode(ctx, tx, opts)
-}
-
-// Token metadata limits: display hints are not worth slowing a report down.
-const (
-	maxTokenMetadata     = 16
-	tokenMetadataTimeout = 3 * time.Second
-)
-
-// annotateTokens fills Symbol and Decimals on simulated token assets from
-// the token contracts themselves. It runs after the rules, which never read
-// these fields: they are self-reported by the contract, can be spoofed, and
-// are only display hints (the API schema and UI label them unverified).
-// Failures leave the fields empty.
-func (a *Analyzer) annotateTokens(ctx context.Context, chainID uint64, sim *models.SimulationResult) {
-	if a.d.Chains == nil || (len(sim.AssetTransfers) == 0 && len(sim.BalanceChanges) == 0) {
-		return
-	}
-	reader, err := a.d.Chains.Reader(chainID)
-	if err != nil {
-		return
-	}
-	type meta struct {
-		symbol   string
-		decimals *uint8
-	}
-	found := map[common.Address]*meta{}
-	var order []common.Address
-	collect := func(ref models.AssetRef) {
-		if ref.Kind == models.AssetNative || !common.IsHexAddress(ref.Address) || len(order) >= maxTokenMetadata {
-			return
-		}
-		addr := common.HexToAddress(ref.Address)
-		if _, seen := found[addr]; !seen {
-			found[addr] = nil
-			order = append(order, addr)
-		}
-	}
-	for _, t := range sim.AssetTransfers {
-		collect(t.Asset)
-	}
-	for _, b := range sim.BalanceChanges {
-		collect(b.Asset)
-	}
-	if len(order) == 0 {
-		return
-	}
-	var blk *big.Int
-	if sim.BlockNumber > 0 {
-		blk = new(big.Int).SetUint64(sim.BlockNumber)
-	}
-	mctx, cancel := context.WithTimeout(ctx, tokenMetadataTimeout)
-	defer cancel()
-	for _, addr := range order {
-		symbol, decimals, err := evm.TokenMetadata(mctx, reader, addr, blk)
-		if err != nil {
-			return // endpoint trouble: skip the rest rather than wait on each
-		}
-		found[addr] = &meta{symbol, decimals}
-	}
-	apply := func(ref *models.AssetRef) {
-		if ref.Kind == models.AssetNative || !common.IsHexAddress(ref.Address) {
-			return
-		}
-		m := found[common.HexToAddress(ref.Address)]
-		if m == nil {
-			return
-		}
-		ref.Symbol = m.symbol
-		// Decimals only make sense for fungible tokens.
-		if ref.Kind == models.AssetERC20 {
-			ref.Decimals = m.decimals
-		}
-	}
-	for i := range sim.AssetTransfers {
-		apply(&sim.AssetTransfers[i].Asset)
-	}
-	for i := range sim.BalanceChanges {
-		apply(&sim.BalanceChanges[i].Asset)
-	}
 }

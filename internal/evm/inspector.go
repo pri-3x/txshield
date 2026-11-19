@@ -51,6 +51,11 @@ const inspectCallGas = 100_000
 type Inspector struct {
 	reg   interfaces.ChainRegistry
 	cache *lru
+	// std caches token standards by (chain, address, code hash,
+	// implementation) across blocks: they follow from the code that runs, so
+	// a new block only needs the code and proxy slots re-read (in parallel),
+	// not the ERC-165/ERC-20 probe chain.
+	std *lru
 }
 
 var _ interfaces.ContractInspector = (*Inspector)(nil)
@@ -61,7 +66,7 @@ func NewInspector(reg interfaces.ChainRegistry, cacheSize int) *Inspector {
 	if cacheSize <= 0 {
 		cacheSize = 4096
 	}
-	return &Inspector{reg: reg, cache: newLRU(cacheSize)}
+	return &Inspector{reg: reg, cache: newLRU(cacheSize), std: newLRU(cacheSize)}
 }
 
 // Inspect reads facts about addr at block (0 = latest, not cached).
@@ -81,7 +86,7 @@ func (in *Inspector) Inspect(ctx context.Context, chainID uint64, addr common.Ad
 	if block > 0 {
 		blk = new(big.Int).SetUint64(block)
 	}
-	info, err := inspect(ctx, r, chainID, addr, blk)
+	info, err := inspectWith(ctx, r, chainID, addr, blk, in.std)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +99,10 @@ func (in *Inspector) Inspect(ctx context.Context, chainID uint64, addr common.Ad
 }
 
 func inspect(ctx context.Context, r interfaces.ChainReader, chainID uint64, addr common.Address, blk *big.Int) (*models.ContractInfo, error) {
+	return inspectWith(ctx, r, chainID, addr, blk, nil)
+}
+
+func inspectWith(ctx context.Context, r interfaces.ChainReader, chainID uint64, addr common.Address, blk *big.Int, stdCache *lru) (*models.ContractInfo, error) {
 	info := &models.ContractInfo{ChainID: chainID, Address: addr.Hex()}
 	code, err := r.CodeAt(ctx, addr, blk)
 	if err != nil {
@@ -122,11 +131,21 @@ func inspect(ctx context.Context, r interfaces.ChainReader, chainID uint64, addr
 		info.IsProxy, info.Implementation = true, impl.Hex()
 	}
 
+	stdKey := fmt.Sprintf("%d|%s|%s|%s", chainID, addr.Hex(), info.CodeHash, info.Implementation)
+	if stdCache != nil {
+		if v, ok := stdCache.get(stdKey); ok {
+			info.Standards = append([]string(nil), v.Standards...)
+			return info, nil
+		}
+	}
 	std, err := detectStandards(ctx, r, addr, blk)
 	if err != nil {
 		return nil, err
 	}
 	info.Standards = std
+	if stdCache != nil {
+		stdCache.put(stdKey, &models.ContractInfo{Standards: append([]string(nil), std...)})
+	}
 	return info, nil
 }
 
@@ -147,13 +166,28 @@ func slotAddress(ctx context.Context, r interfaces.ChainReader, addr common.Addr
 }
 
 func slotProxyTarget(ctx context.Context, r interfaces.ChainReader, addr common.Address, blk *big.Int) (common.Address, error) {
-	for _, slot := range []common.Hash{slotEIP1967Impl, slotEIP1822, slotOZLegacy} {
-		a, err := slotAddress(ctx, r, addr, slot, blk)
-		if err != nil || a != (common.Address{}) {
-			return a, err
+	// All four slots are read at once; precedence is applied afterwards.
+	slots := []common.Hash{slotEIP1967Impl, slotEIP1822, slotOZLegacy, slotEIP1967Beacon}
+	vals := make([]common.Address, len(slots))
+	errs := make([]error, len(slots))
+	var wg sync.WaitGroup
+	for i, slot := range slots {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			vals[i], errs[i] = slotAddress(ctx, r, addr, slot, blk)
+		}()
+	}
+	wg.Wait()
+	for i := range slots[:3] {
+		if errs[i] != nil {
+			return common.Address{}, errs[i]
+		}
+		if vals[i] != (common.Address{}) {
+			return vals[i], nil
 		}
 	}
-	beacon, err := slotAddress(ctx, r, addr, slotEIP1967Beacon, blk)
+	beacon, err := vals[3], errs[3]
 	if err != nil || beacon == (common.Address{}) {
 		return common.Address{}, err
 	}
@@ -217,19 +251,28 @@ func detectStandards(ctx context.Context, r interfaces.ChainReader, addr common.
 			}
 		}
 	}
-	// ERC-20 heuristic (ERC-20 has no ERC-165 identifier).
-	ts, ok1, err := staticCall(ctx, r, addr, selTotalSupply, blk)
-	if err != nil {
-		return nil, err
+	// ERC-20 heuristic (ERC-20 has no ERC-165 identifier). The three probes
+	// are independent and run at once.
+	probes := [][]byte{selTotalSupply, append(append([]byte{}, selBalanceOf...), make([]byte, 32)...), selDecimals}
+	outs := make([][]byte, 3)
+	oks := make([]bool, 3)
+	errs := make([]error, 3)
+	var wg sync.WaitGroup
+	for i, data := range probes {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			outs[i], oks[i], errs[i] = staticCall(ctx, r, addr, data, blk)
+		}()
 	}
-	bal, ok2, err := staticCall(ctx, r, addr, append(append([]byte{}, selBalanceOf...), make([]byte, 32)...), blk)
-	if err != nil {
-		return nil, err
+	wg.Wait()
+	for _, err := range errs {
+		if err != nil {
+			return nil, err
+		}
 	}
-	dec, ok3, err := staticCall(ctx, r, addr, selDecimals, blk)
-	if err != nil {
-		return nil, err
-	}
+	ts, bal, dec := outs[0], outs[1], outs[2]
+	ok1, ok2, ok3 := oks[0], oks[1], oks[2]
 	if ok1 && ok2 && ok3 && len(ts) == 32 && len(bal) == 32 && len(dec) == 32 && new(big.Int).SetBytes(dec).Cmp(big.NewInt(255)) <= 0 {
 		return []string{"erc20"}, nil
 	}

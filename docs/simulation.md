@@ -16,6 +16,7 @@ Code: [`internal/simulator`](../internal/simulator),
 | Backend | How | Completeness | Use when |
 |---|---|---|---|
 | `anvil` (default) | Private Anvil fork at the pinned block, sender impersonated, tx mined locally | `full` when trace and balance reads succeed | Normal operation |
+| `rpc-simulate` | Upstream `eth_simulateV1` with `traceTransfers` (native transfers as pseudo-logs), `validation: false` (fees not charged); one more `eth_simulateV1` round trip of `[balanceOf…, tx, balanceOf…]` for the sender's token balance diffs. Falls back to `rpc-trace` when the endpoint lacks the method | at most `partial` (no call trace, so trace-based rules do not run) | Real-time checks (browser extension) and public RPC endpoints, which often offer `eth_simulateV1` but not `debug_*` |
 | `rpc-trace` | Upstream `debug_traceCall` (callTracer + logs), falls back to `eth_call` | at most `partial` (no post-state, so no balance diffs) | Anvil cannot run |
 | none | Static analysis only | `none` | Offline mode |
 
@@ -125,8 +126,30 @@ WebSocket, OpenTelemetry, and gopsutil):
     `0xffffffff`, or its claims are ignored.
   - ERC-20 by heuristic: `totalSupply`, `balanceOf`, and `decimals` all answer.
 
-Results at pinned blocks are cached (LRU, 4,096 entries). Verification status
-and names are not fetched (no paid services).
+Results at pinned blocks are cached (LRU, 4,096 entries). Token standards are
+also cached across blocks by (address, code hash, proxy implementation): a new
+block re-reads only the code and the four proxy slots (in parallel), so an
+upgrade is still seen at once. Verification status and names are not fetched
+(no paid services).
+
+### rpc-simulate details
+
+- Errors with codes -38000 to -38999 (invalid nonce, insufficient funds) reject
+  the transaction before execution and are reported as reverts, like Anvil's
+  pre-execution rejections. Other JSON-RPC errors switch to `rpc-trace`;
+  transport failures are infrastructure errors.
+- Native transfers come from `traceTransfers` pseudo-logs (Geth emits them from
+  `0xff…fe`; the spec and some clients use the ERC-7528 address
+  `0xEeee…EEeE`). They are converted to native asset transfers and removed from
+  the contract log list.
+- The sender's native balance change is derived from those transfers (fees
+  are not charged); token balance changes are read before and after the
+  transaction inside one simulated block. If the replay in that second round
+  trip fails (state moved between round trips), no token diffs are reported.
+- Measured on Sepolia through a public endpoint, from a laptop in India
+  (2026-11-19): simulation 180-520 ms, whole analysis 380-890 ms warm and on
+  a new block, ~1.5 s for the first sight of a contract. Resolving the latest
+  block (200-600 ms) is now the largest single cost.
 
 ## Test fixtures
 

@@ -50,6 +50,8 @@ func buildEngine(cfg config.Config, pool *pgxpool.Pool) (*api.Engine, []interfac
 			e.Simulator = sim
 			closer = sim.Close
 			checks = append(checks, binaryHealth{name: "anvil", path: cfg.Simulation.AnvilPath})
+		case "rpc-simulate":
+			e.Simulator = simulator.NewRPCSimulate(e.Chains, cfg.Simulation.Timeout)
 		case "rpc-trace":
 			e.Simulator = simulator.NewRPCTrace(e.Chains, cfg.Simulation.Timeout)
 		}

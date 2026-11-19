@@ -39,6 +39,7 @@ type Server struct {
 	prefix  []string        // registered parameterized path prefixes
 	handler http.Handler
 	health  healthCache
+	install *installIssuer // nil when install tokens are disabled
 }
 
 // New builds the server and its handler chain.
@@ -50,6 +51,9 @@ func New(d Deps) *Server {
 		checks:  d.Checks,
 		engine:  d.Engine,
 		routes:  map[string]bool{},
+	}
+	if d.Config.API.InstallTokens {
+		s.install = newInstallIssuer(d.Config.API.InstallTokenSecret, d.Config.API.InstallRateRPS, d.Config.API.InstallRateBurst)
 	}
 	mux := http.NewServeMux()
 	s.handle(mux, "GET", "/livez", s.handleLive)
@@ -65,6 +69,7 @@ func New(d Deps) *Server {
 	s.handle(mux, "GET", "/api/v1/stats", s.handleStats)
 	s.handle(mux, "POST", "/api/v1/decode", s.handleDecode)
 	s.handle(mux, "GET", "/api/v1/transactions/{hash}", s.handleTransaction)
+	s.handle(mux, "POST", "/api/v1/install", s.handleInstall)
 	mux.Handle("GET "+d.Config.MetricsPath, promhttp.HandlerFor(d.Metrics.Registry, promhttp.HandlerOpts{}))
 	s.routes[d.Config.MetricsPath] = true
 	mux.HandleFunc("/", s.handleFallback)
@@ -79,7 +84,7 @@ func New(d Deps) *Server {
 	}
 	// Rate limiting wraps authentication so floods of requests with bad or
 	// missing keys are throttled too.
-	h = apiKeyAuth(d.Config.API.APIKeys)(h)
+	h = authenticate(d.Config.API.APIKeys, s.install)(h)
 	h = rateLimit(limiter, d.Config.API.TrustProxyHeaders, d.Metrics)(h)
 	h = cors(d.Config.API.CORSOrigins)(h)
 	h = accessLog(h)

@@ -19,6 +19,7 @@ type Metrics struct {
 	RateLimited      prometheus.Counter
 	Analyses         *prometheus.CounterVec
 	AnalysisDuration prometheus.Histogram
+	AnalysisStage    *prometheus.HistogramVec
 	Simulations      *prometheus.CounterVec
 	StoreErrors      prometheus.Counter
 }
@@ -56,6 +57,11 @@ func New(version, commit string) *Metrics {
 		Namespace: "txshield", Name: "analysis_duration_seconds", Help: "End-to-end analysis latency.",
 		Buckets: []float64{.01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, 30},
 	})
+	m.AnalysisStage = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "txshield", Name: "analysis_stage_duration_seconds",
+		Help:    "Latency of each analysis stage (decode, block, simulate, context, rules, tokens). Context overlaps simulate.",
+		Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+	}, []string{"stage"})
 	m.Simulations = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "txshield", Name: "simulations_total", Help: "Simulations by backend, status, and completeness.",
 	}, []string{"backend", "status", "completeness"})
@@ -70,7 +76,7 @@ func New(version, commit string) *Metrics {
 
 	reg.MustRegister(
 		m.HTTPRequests, m.HTTPDuration, m.HTTPInFlight, m.HealthStatus, buildInfo,
-		m.RateLimited, m.Analyses, m.AnalysisDuration, m.Simulations, m.StoreErrors,
+		m.RateLimited, m.Analyses, m.AnalysisDuration, m.AnalysisStage, m.Simulations, m.StoreErrors,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
