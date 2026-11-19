@@ -83,7 +83,9 @@ func (i *installIssuer) verify(token string) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	raw, err := base64.RawURLEncoding.DecodeString(rest)
+	// Strict: reject non-zero unused bits, so each token has exactly one
+	// valid spelling.
+	raw, err := base64.RawURLEncoding.Strict().DecodeString(rest)
 	if err != nil || len(raw) != installIDLen+installMACLen {
 		return "", false
 	}

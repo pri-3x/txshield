@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -110,13 +111,42 @@ func TestInstallTokenRejectsForgery(t *testing.T) {
 	if rr := authed(t, other, "POST", "/api/v1/analyze", tok, tx); rr.Code != 401 || errBody(t, rr).Code != "invalid_install_token" {
 		t.Fatalf("token from another server: %d %s", rr.Code, rr.Body)
 	}
-	b := []byte(tok)
-	b[len(b)-1] ^= 1
-	if rr := authed(t, s, "POST", "/api/v1/analyze", string(b), tx); rr.Code != 401 {
-		t.Fatalf("tampered token: %d", rr.Code)
+	// Flip one bit of the signature itself and re-encode canonically.
+	raw, err := base64.RawURLEncoding.DecodeString(strings.TrimPrefix(tok, installPrefix))
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw[len(raw)-1] ^= 1
+	forged := installPrefix + base64.RawURLEncoding.EncodeToString(raw)
+	if rr := authed(t, s, "POST", "/api/v1/analyze", forged, tx); rr.Code != 401 {
+		t.Fatalf("tampered signature: %d", rr.Code)
 	}
 	if rr := authed(t, s, "POST", "/api/v1/analyze", installPrefix+"AAAA", tx); rr.Code != 401 {
 		t.Fatalf("short token: %d", rr.Code)
+	}
+}
+
+// A token has exactly one valid spelling. Its last base64 character carries
+// 2 unused bits; a lenient decoder ignores them, so a variant with those bits
+// set used to decode to the same bytes and pass (CI caught this on a random
+// token). Every token is checked, since only some last characters differ.
+func TestInstallTokenRejectsNonCanonicalEncoding(t *testing.T) {
+	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+	s := installServer(t, &memStore{}, func(c *config.Config) { c.API.InstallRateBurst = 1000 })
+	tx := map[string]any{"chainId": 1, "from": sender, "to": usdc, "data": approveMax}
+	for i := range 20 {
+		tok, err := s.install.newToken()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rr := authed(t, s, "POST", "/api/v1/analyze", tok, tx); rr.Code != 200 {
+			t.Fatalf("token %d: canonical form rejected: %d", i, rr.Code)
+		}
+		last := strings.IndexByte(alphabet, tok[len(tok)-1])
+		variant := tok[:len(tok)-1] + string(alphabet[last^1]) // flips an unused bit
+		if rr := authed(t, s, "POST", "/api/v1/analyze", variant, tx); rr.Code != 401 {
+			t.Fatalf("token %d: non-canonical spelling %q accepted: %d", i, variant, rr.Code)
+		}
 	}
 }
 
