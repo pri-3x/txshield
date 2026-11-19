@@ -132,6 +132,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get an anonymous install token
+         * @description Issues a token for a browser-extension install. Enabled only when the server sets TXSHIELD_INSTALL_TOKENS. The token is not stored and identifies no person or device. Requests made with it may only analyze or decode, are rate limited per token, and are never persisted. Issuance is rate limited per IP.
+         */
+        post: operations["install"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/openapi.json": {
         parameters: {
             query?: never;
@@ -551,6 +571,11 @@ export interface components {
             rules: number;
             simulator: string;
             version: string;
+        };
+        InstallResponse: {
+            note: string;
+            scope: string[];
+            token: string;
         };
         Log: {
             address: string;
@@ -1218,6 +1243,44 @@ export interface operations {
             };
             /** @description Internal error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    install: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token issued */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstallResponse"];
+                };
+            };
+            /** @description Install tokens are not enabled on this server */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Rate limited (see `Retry-After`) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

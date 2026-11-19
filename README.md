@@ -32,7 +32,7 @@ risks detected by enabled checks."*
 | Reputation: JSON allow/block lists, Postgres records, external-adapter interface | ✅ |
 | Risk scoring 0–100 with dedup, decay, floors, per-finding contributions | ✅ ([method](docs/risk-scoring.md)) |
 | `txshield analyze` (offline: calldata + reputation lists; exit code 3 on high risk) | ✅ |
-| Fork simulation (Anvil worker pool), `rpc-trace` fallback, traces, events, balance diffs | ✅ ([design](docs/simulation.md)) |
+| Fork simulation (Anvil worker pool), `rpc-simulate` (`eth_simulateV1`) and `rpc-trace` backends, traces, events, balance diffs | ✅ ([design](docs/simulation.md)) |
 | On-chain contract checks: code, EIP-7702, proxies (1167/1967/beacon/1822), ERC-165/ERC-20 detection | ✅ |
 | Hardened read-only RPC client: method allowlist, retries with jitter, circuit breaker, size caps, key redaction | ✅ |
 | `txshield analyze --rpc`, `txshield simulate` | ✅ |
@@ -119,7 +119,8 @@ All configuration comes from `TXSHIELD_*` environment variables; see
 | `TXSHIELD_DATABASE_URL` | — | Enables persistence. Empty means stateless. |
 | `TXSHIELD_REDIS_URL` | — | Optional cache. |
 | `TXSHIELD_ALLOW_USER_RPC` | `false` | Whether API clients may supply RPC URLs (https only, SSRF-guarded, rpc-trace simulation only). |
-| `TXSHIELD_SIMULATOR` | `anvil` | `anvil`, `rpc-trace`, or `none`. |
+| `TXSHIELD_SIMULATOR` | `anvil` | `anvil`, `rpc-simulate` (`eth_simulateV1`, fastest, works on public RPCs), `rpc-trace`, or `none`. |
+| `TXSHIELD_INSTALL_TOKENS` | `false` | Anonymous per-install tokens for the browser extension; their analyses are never stored. See [API docs](docs/api.md#install-tokens-browser-extension). |
 | `TXSHIELD_API_KEYS` | — | When set, `/api/` routes require `Authorization: Bearer <key>`. |
 | `TXSHIELD_RATE_LIMIT_RPS` / `_BURST` | `5` / `20` | Per-client-IP limit on `/api/` routes. |
 | `TXSHIELD_REPUTATION_FILES` | — | Comma-separated JSON allow/block lists. |

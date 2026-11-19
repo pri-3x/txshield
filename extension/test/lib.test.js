@@ -14,7 +14,7 @@ const FROM = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 describe("toApiRequest", () => {
   it("maps wallet params to an analyze request", () => {
     const r = lib.toApiRequest({ from: FROM, to: drainer.transaction.to, value: "0x2386f26fc10000", data: "0x4e71d92d", gas: "0x5208" }, "0x7a69");
-    expect(r).toEqual({ ok: true, request: { chainId: 31337, from: FROM, to: drainer.transaction.to, value: "0x2386f26fc10000", data: "0x4e71d92d", gas: "0x5208", simulate: true } });
+    expect(r).toEqual({ ok: true, request: { chainId: 31337, from: FROM, to: drainer.transaction.to, value: "0x2386f26fc10000", data: "0x4e71d92d", gas: "0x5208", simulate: true, persist: false } });
   });
 
   it("accepts input/gasLimit aliases and contract creation", () => {
@@ -127,5 +127,93 @@ describe("analyze", () => {
     expect(down.ok).toBe(false);
     expect(down.error).toMatch(/Could not reach/);
     expect((await lib.analyze({ ...settings, apiUrl: "file:///x" }, {})).ok).toBe(false);
+  });
+});
+
+describe("analyze with an install token", () => {
+  const settings = { ...lib.DEFAULTS, apiUrl: "http://127.0.0.1:18080", apiKey: "" };
+  const memTokens = (initial = "") => {
+    let v = initial;
+    return { get: async () => v, set: async (t) => { v = t; }, peek: () => v };
+  };
+  const json = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+
+  it("fetches a token once, stores it, and reuses it", async () => {
+    const calls = [];
+    const fetchImpl = async (url, init) => {
+      calls.push([url.replace(settings.apiUrl, ""), init.headers && init.headers.Authorization]);
+      if (url.endsWith("/install")) return json(201, { token: "txsi_abc" });
+      return json(200, drainer);
+    };
+    const tokens = memTokens();
+    expect((await lib.analyze(settings, {}, fetchImpl, tokens)).ok).toBe(true);
+    expect((await lib.analyze(settings, {}, fetchImpl, tokens)).ok).toBe(true);
+    expect(tokens.peek()).toBe("txsi_abc");
+    expect(calls).toEqual([
+      ["/api/v1/install", undefined],
+      ["/api/v1/analyze", "Bearer txsi_abc"],
+      ["/api/v1/analyze", "Bearer txsi_abc"],
+    ]);
+  });
+
+  it("replaces a token the server no longer accepts, once", async () => {
+    let issued = 0;
+    const fetchImpl = async (url, init) => {
+      if (url.endsWith("/install")) return json(201, { token: `txsi_new${++issued}` });
+      if (init.headers.Authorization === "Bearer txsi_old") return json(401, { error: { code: "invalid_install_token", message: "x" } });
+      return json(200, drainer);
+    };
+    const tokens = memTokens("txsi_old");
+    const res = await lib.analyze(settings, {}, fetchImpl, tokens);
+    expect(res.ok).toBe(true);
+    expect(tokens.peek()).toBe("txsi_new1");
+    expect(issued).toBe(1);
+  });
+
+  it("works without auth when the server has install tokens disabled", async () => {
+    const fetchImpl = async (url, init) => {
+      if (url.endsWith("/install")) return json(422, { error: { code: "install_tokens_disabled" } });
+      expect(init.headers.Authorization).toBeUndefined();
+      return json(200, drainer);
+    };
+    expect((await lib.analyze(settings, {}, fetchImpl, memTokens())).ok).toBe(true);
+  });
+
+  it("prefers a configured API key and never requests a token", async () => {
+    const fetchImpl = async (url, init) => {
+      expect(url).not.toMatch(/install/);
+      expect(init.headers.Authorization).toBe("Bearer key");
+      return json(200, drainer);
+    };
+    expect((await lib.analyze({ ...settings, apiKey: "key" }, {}, fetchImpl, memTokens())).ok).toBe(true);
+  });
+
+  it("times out as a whole", async () => {
+    const fetchImpl = (url, init) =>
+      new Promise((_, reject) => init.signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
+    const res = await lib.analyze({ ...settings, timeoutMs: 30 }, {}, fetchImpl, memTokens("txsi_x"));
+    expect(res).toEqual({ ok: false, error: "The TxShield API did not answer in time." });
+  });
+});
+
+describe("targetLabel", () => {
+  it("says 'to' for a plain transfer, never 'contract'", () => {
+    expect(lib.targetLabel(send)).toBe(`to ${lib.shortHex(send.transaction.to)}`);
+    expect(lib.viewModel(send, {}).targetLabel).not.toMatch(/contract/);
+  });
+
+  it("says 'calls' for function calls", () => {
+    expect(lib.targetLabel(approve)).toBe(`calls ${lib.shortHex(approve.transaction.to)}`);
+    expect(lib.targetLabel(drainer)).toBe(`calls ${lib.shortHex(drainer.transaction.to)}`);
+  });
+
+  it("flags a call to an address without code", () => {
+    const r = { ...approve, findings: [...approve.findings, { ruleId: "TXS-INTERACT-005", severity: "medium", title: "x" }] };
+    expect(lib.targetLabel(r)).toBe(`calls ${lib.shortHex(approve.transaction.to)} (an address with no code)`);
+  });
+
+  it("describes contract creation", () => {
+    expect(lib.targetLabel({ transaction: { kind: "contract_creation" }, findings: [] })).toBe("creates a contract");
+    expect(lib.targetLabel({ transaction: { kind: "contract_call" }, findings: [] })).toBe("creates a contract");
   });
 });

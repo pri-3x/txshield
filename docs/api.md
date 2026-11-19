@@ -24,6 +24,7 @@ transaction safe.
 | GET | `/api/v1/analyses/{id}` | One stored report |
 | GET | `/api/v1/stats` | Totals, high-risk count, by category, by chain |
 | GET | `/api/v1/info` | Configured chains, simulator, rule count, reputation sources |
+| POST | `/api/v1/install` | Anonymous install token for the browser extension (only with `TXSHIELD_INSTALL_TOKENS=true`) |
 | GET | `/api/v1/openapi.json` | OpenAPI document |
 | GET | `/health`, `/livez`, `/metrics` | Readiness with dependency checks, liveness, Prometheus |
 
@@ -116,6 +117,22 @@ preserved for correlation.
 Without API keys the API is open. Bind it to localhost (the Compose default)
 or put it behind an authenticating proxy.
 
+### Install tokens (browser extension)
+
+`TXSHIELD_INSTALL_TOKENS=true` lets each extension install fetch an anonymous
+token from `POST /api/v1/install`, so no shared secret has to ship inside the
+extension. A token is a random ID plus an HMAC; the server verifies it without
+storing anything, and it identifies no person or device.
+
+| Property | Behavior |
+|---|---|
+| Scope | `POST /api/v1/analyze`, `POST /api/v1/decode`, `GET /api/v1/info` only; anything else is 403 (history stays behind API keys) |
+| Persistence | Never stored, whatever `persist` says |
+| Rate limits | `TXSHIELD_INSTALL_RATE_RPS` / `_BURST` per token (default 1 / 10), on top of the per-IP limit; issuance is limited to a burst of 5 per IP, then one per 12 minutes |
+| Secret | `TXSHIELD_INSTALL_TOKEN_SECRET` (32+ characters) keeps tokens valid across restarts and replicas; without it a random per-process secret is used and the extension silently fetches a new token after a restart (401 `invalid_install_token`) |
+
+Install tokens work whether or not API keys are configured.
+
 ## Persistence and privacy
 
 With `TXSHIELD_DATABASE_URL` set, analyses are stored (unless `persist:
@@ -135,7 +152,13 @@ warning instead.
 
 On top of the HTTP request metrics: `txshield_analyses_total{category}`,
 `txshield_analysis_duration_seconds`,
+`txshield_analysis_stage_duration_seconds{stage}` (decode, block, simulate,
+context, rules, tokens; context overlaps simulate),
 `txshield_simulations_total{backend,status,completeness}`,
 `txshield_rate_limited_total`,
 `txshield_store_errors_total`, and `txshield_dependency_up{dependency}` (which
 includes `rpc:<chainId>` and `simulator:anvil`).
+
+Every analysis response also carries a `Server-Timing` header with the same
+stages (`decode;dur=…, …, total;dur=…`, milliseconds), visible in browser
+developer tools. It contains durations only, nothing about the transaction.

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"math/big"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -23,6 +24,7 @@ type fakeReader struct {
 	calls    map[string][]byte
 	infraErr error
 	n        atomic.Int32
+	callN    atomic.Int32
 }
 
 var errRevert = &RPCError{Code: 3, Message: "execution reverted"}
@@ -43,6 +45,7 @@ func (f *fakeReader) StorageAt(_ context.Context, a common.Address, s common.Has
 	return make([]byte, 32), nil
 }
 func (f *fakeReader) CallContract(_ context.Context, tx *models.Transaction, _ *big.Int) ([]byte, error) {
+	f.callN.Add(1)
 	if out, ok := f.calls[tx.To.Hex()+"|"+hex.EncodeToString(tx.Data)]; ok {
 		return out, nil
 	}
@@ -189,5 +192,46 @@ func TestLRUEviction(t *testing.T) {
 func TestIsExecutionError(t *testing.T) {
 	if !IsExecutionError(errRevert) || IsExecutionError(errors.New("x")) || IsExecutionError(txerrors.Wrap(errRevert, txerrors.KindUnavailable, "c", "m")) {
 		t.Fatal("classification")
+	}
+}
+
+// Standards are probed once per (code, implementation) and reused across
+// blocks; a proxy upgrade (new implementation) is seen on the next block and
+// re-probed.
+func TestInspectorReusesStandardsAcrossBlocks(t *testing.T) {
+	tok := common.HexToAddress("0x5555555555555555555555555555555555555555")
+	word := func(n int64) []byte { return common.LeftPadBytes(big.NewInt(n).Bytes(), 32) }
+	r := &fakeReader{
+		code:    map[common.Address][]byte{tok: common.FromHex("0x6080604052")},
+		storage: map[common.Address]map[common.Hash][]byte{tok: {}},
+		calls: map[string][]byte{
+			tok.Hex() + "|18160ddd":                           word(1000),
+			tok.Hex() + "|70a08231" + strings.Repeat("0", 64): word(0),
+			tok.Hex() + "|313ce567":                           word(18),
+		},
+	}
+	in := NewInspector(fakeRegistry{r}, 0)
+	ctx := context.Background()
+	a, err := in.Inspect(ctx, 1, tok, 10)
+	if err != nil || len(a.Standards) != 1 || a.Standards[0] != "erc20" || a.IsProxy {
+		t.Fatalf("block 10: %+v %v", a, err)
+	}
+	probes := r.callN.Load()
+	b, err := in.Inspect(ctx, 1, tok, 11)
+	if err != nil || len(b.Standards) != 1 || b.Standards[0] != "erc20" || b.AtBlock != 11 {
+		t.Fatalf("block 11: %+v %v", b, err)
+	}
+	if r.callN.Load() != probes {
+		t.Fatalf("standards re-probed on a new block (%d -> %d calls)", probes, r.callN.Load())
+	}
+	// Upgrade: the EIP-1967 implementation slot now points somewhere.
+	impl := common.HexToAddress("0x6666666666666666666666666666666666666666")
+	r.storage[tok][slotEIP1967Impl] = common.LeftPadBytes(impl.Bytes(), 32)
+	c, err := in.Inspect(ctx, 1, tok, 12)
+	if err != nil || !c.IsProxy || common.HexToAddress(c.Implementation) != impl {
+		t.Fatalf("upgrade not seen: %+v %v", c, err)
+	}
+	if r.callN.Load() == probes {
+		t.Fatal("standards not re-probed after the implementation changed")
 	}
 }

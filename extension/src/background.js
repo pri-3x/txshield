@@ -13,12 +13,23 @@ async function loadSettings() {
   return { ...lib.DEFAULTS, ...sync, ...local };
 }
 
+// The anonymous install token stays on this device (never synced). It
+// identifies no person; the server does not store it.
+const installTokens = {
+  async get() {
+    return (await chrome.storage.local.get({ installToken: "" })).installToken;
+  },
+  async set(token) {
+    await chrome.storage.local.set({ installToken: token });
+  },
+};
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Only our own content scripts (which run in tabs) may ask for analyses.
   if (!msg || msg.type !== "txshield:analyze" || sender.id !== chrome.runtime.id || !sender.tab) return false;
   (async () => {
     const settings = await loadSettings();
-    const res = await lib.analyze(settings, msg.request);
+    const res = await lib.analyze(settings, msg.request, undefined, installTokens);
     // Settings the content script needs; never the API key.
     sendResponse({ ...res, settings: { threshold: settings.threshold, dashboardUrl: settings.dashboardUrl } });
   })();

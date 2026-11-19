@@ -48,6 +48,18 @@ type APIConfig struct {
 	// APIKeys, when non-empty, are required as "Authorization: Bearer <key>"
 	// on /api/ routes. Secrets: never logged.
 	APIKeys []string
+	// InstallTokens enables anonymous per-install tokens for the browser
+	// extension: POST /api/v1/install issues one, and requests that carry it
+	// may only analyze, are rate limited per token, and are never stored.
+	InstallTokens bool
+	// InstallTokenSecret signs install tokens (at least 32 characters).
+	// Empty: a random per-process secret, so tokens stop working on restart
+	// and the extension fetches a new one. Secret: never logged.
+	InstallTokenSecret string
+	// InstallRateRPS and InstallRateBurst bound requests per install token
+	// (in addition to the per-IP limit).
+	InstallRateRPS   float64
+	InstallRateBurst int
 }
 
 type HTTPConfig struct {
@@ -92,7 +104,7 @@ type RedisConfig struct {
 }
 
 type SimulationConfig struct {
-	Backend       string // anvil, rpc-trace, none
+	Backend       string // anvil, rpc-simulate, rpc-trace, none
 	AnvilPath     string
 	Timeout       time.Duration
 	MaxConcurrent int
@@ -126,7 +138,7 @@ func Defaults() Config {
 			Timeout:       30 * time.Second,
 			MaxConcurrent: 4,
 		},
-		API:         APIConfig{RateLimitRPS: 5, RateLimitBurst: 20},
+		API:         APIConfig{RateLimitRPS: 5, RateLimitBurst: 20, InstallRateRPS: 1, InstallRateBurst: 10},
 		MetricsPath: "/metrics",
 	}
 }
@@ -249,6 +261,18 @@ func LoadFrom(lookup func(string) (string, bool)) (Config, error) {
 		}
 	}
 
+	boolean("INSTALL_TOKENS", &c.API.InstallTokens)
+	str("INSTALL_TOKEN_SECRET", &c.API.InstallTokenSecret)
+	integer("INSTALL_RATE_BURST", 1, func(n int64) { c.API.InstallRateBurst = int(n) })
+	if v, ok := get("INSTALL_RATE_RPS"); ok {
+		f, err := strconv.ParseFloat(v, 64)
+		if err != nil || f <= 0 || f > 10000 {
+			errs = append(errs, fmt.Errorf("TXSHIELD_INSTALL_RATE_RPS: must be a number greater than 0 and at most 10000"))
+		} else {
+			c.API.InstallRateRPS = f
+		}
+	}
+
 	if err := c.validate(); err != nil {
 		errs = append(errs, err)
 	}
@@ -271,15 +295,18 @@ func (c *Config) validate() error {
 		errs = append(errs, fmt.Errorf("TXSHIELD_REQUEST_TIMEOUT (%s) must be less than TXSHIELD_HTTP_WRITE_TIMEOUT (%s)", c.HTTP.RequestTimeout, c.HTTP.WriteTimeout))
 	}
 	switch c.Simulation.Backend {
-	case "anvil", "rpc-trace", "none":
+	case "anvil", "rpc-simulate", "rpc-trace", "none":
 	default:
-		errs = append(errs, fmt.Errorf("TXSHIELD_SIMULATOR: must be anvil, rpc-trace, or none"))
+		errs = append(errs, fmt.Errorf("TXSHIELD_SIMULATOR: must be anvil, rpc-simulate, rpc-trace, or none"))
 	}
 	for _, k := range c.API.APIKeys {
 		if len(k) < 24 {
 			errs = append(errs, fmt.Errorf("TXSHIELD_API_KEYS: every key must be at least 24 characters"))
 			break
 		}
+	}
+	if s := c.API.InstallTokenSecret; s != "" && len(s) < 32 {
+		errs = append(errs, fmt.Errorf("TXSHIELD_INSTALL_TOKEN_SECRET: must be at least 32 characters"))
 	}
 	for _, o := range c.API.CORSOrigins {
 		u, err := url.Parse(o)

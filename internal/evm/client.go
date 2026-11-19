@@ -32,6 +32,7 @@ var upstreamMethods = map[string]bool{
 	"eth_call": true, "eth_estimateGas": true, "eth_gasPrice": true, "eth_maxPriorityFeePerGas": true, "eth_feeHistory": true,
 	"eth_getTransactionByHash": true, "eth_getTransactionReceipt": true, "eth_getLogs": true,
 	"debug_traceCall": true, "debug_traceTransaction": true,
+	"eth_simulateV1": true, // read-only: simulates on top of a block, never mines or broadcasts
 }
 
 // ErrMethodNotAllowed is returned for methods outside the upstream allowlist.

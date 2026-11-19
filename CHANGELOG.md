@@ -9,6 +9,44 @@ contain breaking changes to the API, CLI, and SDK; they are listed under
 The release workflow publishes the section whose heading matches the tag
 (`## [0.1.0]` for `v0.1.0`), so keep that heading format.
 
+## [Unreleased]
+
+### Added
+
+- **`rpc-simulate` simulator** (`TXSHIELD_SIMULATOR=rpc-simulate`): one
+  `eth_simulateV1` round trip with native transfer tracing, plus one for the
+  sender's token balance diffs; falls back to `rpc-trace`. Works with public
+  endpoints that do not offer `debug_*` methods (for example Sepolia's public
+  RPC).
+- **Anonymous install tokens** (`TXSHIELD_INSTALL_TOKENS`, `POST
+  /api/v1/install`) for the browser extension: stateless HMAC tokens, limited
+  to analyze/decode/info, rate limited per token, never persisted.
+- **Latency visibility**: `Server-Timing` header and
+  `txshield_analysis_stage_duration_seconds{stage}`.
+- **Extension**: fetches and stores an install token automatically (replaced
+  once if the server rejects it), sends `persist: false`, 8 s timeout (was
+  25 s).
+
+### Changed
+
+- Simulation now runs in parallel with reputation and contract lookups for
+  the addresses named in calldata; token symbol lookups run in parallel and are
+  cached; contract inspection reads proxy slots in parallel and caches token
+  standards by code hash and implementation. Sepolia, public RPC: whole
+  analysis 2.6-2.8 s on a new block before, 0.73-0.89 s after.
+
+### Fixed
+
+- Addresses that only appear in the simulation (asset senders and recipients,
+  moved tokens, spenders of simulated approvals) are now checked against
+  reputation lists. A drainer forwarding funds to a blocklisted collection
+  wallet held in its storage was previously not flagged.
+- A panic in the simulation, lookup, or token-metadata goroutines no longer
+  crashes the server; the report degrades instead.
+- Extension warning no longer labels every target a "contract": it says
+  "to 0x…" for plain transfers, "calls 0x…" for function calls (noting an
+  address with no code), and "creates a contract" for deployments.
+
 ## [0.1.0] - Unreleased
 
 First public release.
