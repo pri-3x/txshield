@@ -195,3 +195,25 @@ describe("analyze with an install token", () => {
     expect(res).toEqual({ ok: false, error: "The TxShield API did not answer in time." });
   });
 });
+
+describe("targetLabel", () => {
+  it("says 'to' for a plain transfer, never 'contract'", () => {
+    expect(lib.targetLabel(send)).toBe(`to ${lib.shortHex(send.transaction.to)}`);
+    expect(lib.viewModel(send, {}).targetLabel).not.toMatch(/contract/);
+  });
+
+  it("says 'calls' for function calls", () => {
+    expect(lib.targetLabel(approve)).toBe(`calls ${lib.shortHex(approve.transaction.to)}`);
+    expect(lib.targetLabel(drainer)).toBe(`calls ${lib.shortHex(drainer.transaction.to)}`);
+  });
+
+  it("flags a call to an address without code", () => {
+    const r = { ...approve, findings: [...approve.findings, { ruleId: "TXS-INTERACT-005", severity: "medium", title: "x" }] };
+    expect(lib.targetLabel(r)).toBe(`calls ${lib.shortHex(approve.transaction.to)} (an address with no code)`);
+  });
+
+  it("describes contract creation", () => {
+    expect(lib.targetLabel({ transaction: { kind: "contract_creation" }, findings: [] })).toBe("creates a contract");
+    expect(lib.targetLabel({ transaction: { kind: "contract_call" }, findings: [] })).toBe("creates a contract");
+  });
+});

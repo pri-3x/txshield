@@ -43,6 +43,9 @@ The release workflow publishes the section whose heading matches the tag
   wallet held in its storage was previously not flagged.
 - A panic in the simulation, lookup, or token-metadata goroutines no longer
   crashes the server; the report degrades instead.
+- Extension warning no longer labels every target a "contract": it says
+  "to 0x…" for plain transfers, "calls 0x…" for function calls (noting an
+  address with no code), and "creates a contract" for deployments.
 
 ## [0.1.0] - Unreleased
 

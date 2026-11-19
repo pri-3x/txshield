@@ -220,6 +220,21 @@
    * What the warning shows, derived only from the report. Plain language for
    * people who will never read calldata. Never says "safe".
    */
+  /**
+   * Describes what the transaction does with its target, claiming only what
+   * the report shows: a plain transfer goes "to" an address; a function call
+   * "calls" it (flagged when the address has no code, TXS-INTERACT-005).
+   * The report does not say whether a transfer recipient is a contract.
+   */
+  function targetLabel(report) {
+    const tx = report.transaction || {};
+    if (!tx.to || tx.kind === "contract_creation") return "creates a contract";
+    const target = shortHex(tx.to);
+    if (tx.kind === "native_transfer") return `to ${target}`;
+    const noCode = (report.findings || []).some((f) => f.ruleId === "TXS-INTERACT-005");
+    return noCode ? `calls ${target} (an address with no code)` : `calls ${target}`;
+  }
+
   function viewModel(report, settings) {
     const tx = report.transaction || {};
     const chainId = tx.chainId;
@@ -324,10 +339,11 @@
       anyUnverified: sends.concat(receives).some((s) => s.unverified),
       chainName: CHAIN_NAME[chainId] || `chain ${chainId}`,
       target: shortHex(tx.to || ""),
+      targetLabel: targetLabel(report),
       reportUrl: base && report.id ? `${base}/analyses/${encodeURIComponent(report.id)}` : "",
       disclaimer: "TxShield checks are heuristics and not exhaustive. A low score is not a guarantee of safety.",
     };
   }
 
-  return { DEFAULTS, normalizeApiUrl, parseChainId, toApiRequest, analyze, decide, viewModel, formatUnits, cleanText, shortHex, describeAsset };
+  return { DEFAULTS, normalizeApiUrl, parseChainId, toApiRequest, analyze, decide, viewModel, targetLabel, formatUnits, cleanText, shortHex, describeAsset };
 });

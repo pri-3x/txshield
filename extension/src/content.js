@@ -183,7 +183,7 @@
       const title = el("h2", "", vm.error ? "This transaction could not be checked" : vm.headline);
       title.id = "txs-title";
       body.appendChild(title);
-      const desc = el("p", "muted", vm.error ? vm.error : `${vm.chainName} · contract ${vm.target || "creation"}`);
+      const desc = el("p", "muted", vm.error ? vm.error : `${vm.chainName} · ${vm.targetLabel}`);
       desc.id = "txs-desc";
       desc.style.margin = "0";
       body.appendChild(desc);
